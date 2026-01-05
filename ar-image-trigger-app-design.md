@@ -99,3 +99,452 @@ Example \`triggers.json\`:
     }
   ]
 }
+\`\`\`
+
+### 8.2 NFT Metadata Standard
+pAInt works with ERC-721 and ERC-1155 NFT collections on Ethereum. Expected metadata structure:
+
+\`\`\`json
+{
+  "name": "Firmware for Nectar",
+  "attributes": [
+    {
+      "trait_type": "Artist",
+      "value": "MintFace",
+      "display_type": "text"
+    }
+  ],
+  "animation_details": {
+    "bytes": 94612550,
+    "format": "MP4",
+    "duration": 15,
+    "sha256": "78ebb93afa4e8074eaba29e17e01533f78e6f23558870da60612fcff7c89c478",
+    "width": 2160,
+    "height": 3840,
+    "codecs": ["H.264", "AAC"]
+  },
+  "animation": "https://arweave.net/lRlPaR5nX59xe4Af4NptuWzPwrdFb1rZ9Re60fCRafs",
+  "animation_url": "https://arweave.net/lRlPaR5nX59xe4Af4NptuWzPwrdFb1rZ9Re60fCRafs",
+  "image_details": {
+    "bytes": 14301427,
+    "format": "JPEG",
+    "sha256": "a621abf540dec099b62a7e0a6b07bd64ba64d69ee9f627cf23cb7c134d8f03bf",
+    "width": 2374,
+    "height": 4870
+  },
+  "image": "https://arweave.net/kBhMpeLgxV5HJCA5EZb_erMvyZgvVHiM2P1V9vGDHYE",
+  "image_url": "https://arweave.net/kBhMpeLgxV5HJCA5EZb_erMvyZgvVHiM2P1V9vGDHYE"
+}
+\`\`\`
+
+**Key fields:**
+- \`image\` or \`image_url\`: Trigger image (JPEG from Arweave/IPFS)
+- \`animation\` or \`animation_url\`: Video file (MP4 from Arweave/IPFS)
+- \`name\`: NFT name (displayed when trigger found)
+- \`attributes\`: Optional artist metadata
+
+### 8.3 Collection Import Workflow
+1. User pastes Ethereum contract address (0x...)
+2. App queries Etherscan/Alchemy API to:
+   - Validate contract exists
+   - Detect ERC-721 or ERC-1155 standard
+   - Fetch total supply (collection size)
+3. App fetches metadata for all tokens in collection
+4. Preview screen shows:
+   - Collection name
+   - Total NFTs found
+   - Number with valid image + video pairs
+   - Estimated download size
+   - Warnings for any NFTs missing assets
+5. User confirms download (all or selective)
+6. Progress bar shows download status
+7. Assets cached locally for offline use
+
+**Fallback handling:**
+- NFT missing video: Skip (use image-only as static trigger)
+- Image unsuitable for AR tracking: Offer in-app camera to capture high-res photo of physical artwork
+- Download failure: Retry with exponential backoff, show friendly error
+
+### 8.4 Asset Specifications
+**Trigger Images:**
+- Format: JPEG, PNG
+- Min resolution: 1024x1024px (higher is better for tracking)
+- Max file size: 20MB
+- Requirements for tracking: High contrast, rich detail, non-repetitive patterns
+
+**Videos:**
+- Format: MP4 (H.264 + AAC)
+- Duration: 5-20 seconds typical
+- File size: 30-60MB per video
+- Resolution: 1080p-4K (scaled for device)
+- Compression: Optimized for mobile playback
+
+**Collection Bundle Size Estimate:**
+- 35 NFTs = ~35 images (10-15MB each) + 35 videos (30-60MB each)
+- Total: ~1.4-2.6GB per collection
+- Premium users with multiple collections: 5-10GB typical
+
+### 8.5 Content Storage Structure
+\`\`\`
+/Documents/pAInt/
+  collections/
+    [contractAddress]/
+      metadata.json          # Collection info
+      triggers.json          # Generated trigger library
+      assets/
+        [tokenId]_image.jpg  # Trigger images
+        [tokenId]_video.mp4  # AR videos
+        [tokenId]_custom.jpg # Optional user-captured image
+  sample/
+    artificial_flowers/      # Bundled demo collection
+      metadata.json
+      triggers.json
+      assets/
+        ...
+  analytics/
+    scan_events.json         # User-identifiable scan logs
+  cache/
+    downloaded_metadata/     # Cached API responses
+\`\`\`
+
+## 9) Branding & Visual Design
+
+### 9.1 Brand Identity
+- **Name:** pAInt by MintFace
+- **Typography:** "pAInt" in Helvetica font (capital A and I)
+- **Logo:** Cherry emoji 🍒 with 'A' in left cherry, 'I' in right cherry
+- **Tagline:** "Animate your paintings with AI-generated NFTs"
+
+### 9.2 Color Palette
+- **Primary:** Luxury off-black (#0F0F0F)
+- **Secondary:** Payne's grey (#536878, #3D4F5C)
+- **Accent:** White highlights (#FFFFFF, #F5F5F5)
+- **Theme:** Dark mode default
+- **Neon accents:** Subtle cyberpunk touches (electric blue, magenta) for CTAs and highlights
+
+### 9.3 UI Style
+- **Aesthetic:** Tech-forward, cyberpunk-inspired, sophisticated and subtle
+- **Typography:** Sans-serif (system fonts: SF Pro on iOS)
+- **Visual language:** Minimal, futuristic, clean lines
+- **Motion:** Smooth transitions, particle effects on trigger detection
+
+### 9.4 App Icon
+Cherry emoji 🍒 with stylized 'A' and 'I' letters integrated into each cherry sphere. Dark background with subtle gradient.
+
+## 10) User Experience Flows
+
+### 10.1 Onboarding (First Launch)
+1. **Splash screen:** pAInt logo with cherry icon
+2. **Permissions:** Request camera access
+3. **Tutorial (3 screens):**
+   - "Point your camera at artwork"
+   - "Watch it come alive in AR"
+   - "Collect and share NFT animations"
+4. **Sample collection:** Auto-load "Artificial Flowers" demo collection
+5. **Call to action:** "Scan your first artwork" → Camera view
+6. **Hint overlay:** "Try scanning the sample image" (provide printable PDF)
+
+### 10.2 Collection Management Flow
+**Main screen tabs:**
+- **Scan** (default): AR camera view
+- **Collections**: List of imported collections
+- **Settings**: Preferences and premium upgrade
+
+**Import new collection:**
+1. Collections tab → "+" button
+2. Modal: "Enter NFT Contract Address"
+3. Paste 0x... address
+4. Loading: "Fetching collection..."
+5. Preview: Collection name, NFT count, download size
+6. Confirm: "Download [35] NFTs (~1.8 GB)"
+7. Progress bar with cancel option
+8. Success: "Ready to scan!" → Return to camera
+
+**Collection list view:**
+- Card layout with collection thumbnail grid
+- Show: Name, NFT count, storage size
+- Actions: View details, Refresh, Delete
+- Search bar for filtering
+
+### 10.3 AR Scanning Flow
+1. **Camera active:** "Scanning for artwork..."
+2. **Trigger detected:**
+   - Corner highlights appear on detected image
+   - Waterfall animation of 🎉 party hats and 🍒 cherries
+   - NFT name overlay fades in
+3. **Video playback:**
+   - Video anchored to trigger image plane
+   - Auto-play, looped
+   - Sound toggle button (bottom right)
+4. **Multiple triggers:** Each plays independently
+5. **Tracking lost:**
+   - Video continues for 3-5 seconds
+   - If not reacquired: Fade out gracefully
+6. **No collections loaded:**
+   - Overlay: "No collections yet. Tap here to import your first NFT collection."
+
+### 10.4 Custom Image Capture Flow
+If NFT image unsuitable for tracking:
+1. Warning in preview: "⚠️ Low tracking quality detected for [NFT name]"
+2. Option: "Capture high-res photo of physical artwork"
+3. Camera opens in high-res photo mode
+4. User captures physical painting/print
+5. Confirm: "Use this as trigger image?"
+6. Saved as \`[tokenId]_custom.jpg\`, overrides default
+
+## 11) Monetization & Premium Features
+
+### 11.1 Free Tier
+- 1 NFT collection loaded at a time
+- Can swap collections (previous downloads deleted)
+- Full AR scanning functionality
+- Sample "Artificial Flowers" collection included
+- Basic analytics (on-device only)
+
+### 11.2 Premium Tier ($4.99 one-time IAP)
+- Unlimited NFT collections loaded simultaneously
+- Scan any trigger from any collection
+- Priority support
+- Early access to new features
+- Collections persist (no deletion on swap)
+
+### 11.3 Upgrade Prompt
+- Triggered when user tries to import 2nd collection (free tier)
+- Modal: "Unlock Unlimited Collections"
+- Benefits list
+- "Upgrade for $4.99" button
+- Apple In-App Purchase flow
+
+## 12) Technical Architecture
+
+### 12.1 Platform Choice
+**Primary:** iOS native (Swift + ARKit)
+- Faster development for solo dev
+- Better AR performance on iPhone
+- ARKit's image tracking optimized for this use case
+
+**Future:** Android (Kotlin + ARCore) if successful
+
+### 12.2 Key Technologies
+- **AR Framework:** ARKit (ARImageTrackingConfiguration)
+- **Networking:** URLSession for API calls, async/await
+- **Blockchain API:** Etherscan/Alchemy (user provides API key)
+- **IPFS Gateway:** Public gateway (ipfs.io or Cloudflare IPFS)
+- **Video Playback:** AVPlayer with VideoNode in SceneKit/RealityKit
+- **Local Storage:** FileManager for asset caching, UserDefaults for settings
+- **Analytics:** Custom on-device JSON logging
+- **IAP:** StoreKit 2 for premium unlock
+
+### 12.3 Core Components
+1. **CollectionManager:** Fetch, parse, store NFT metadata
+2. **ARSessionManager:** Handle AR session, image tracking, anchor management
+3. **VideoPlayerManager:** Preload, play, sync videos with AR anchors
+4. **AssetDownloader:** Download and cache images/videos from IPFS
+5. **AnalyticsLogger:** Log scan events to local JSON
+6. **IAPManager:** Handle premium purchase and entitlement
+
+### 12.4 AR Implementation Details
+- **ARImageTrackingConfiguration:** Track up to 100 reference images
+- **Dynamic reference image loading:** Load trigger images from collection at runtime
+- **Physical size estimation:** Use image_details.width/height for aspect ratio, default physical width 0.3m
+- **Anchor management:** Create ARAnchor per detected trigger
+- **Video rendering:** SceneKit plane with AVPlayer texture, or RealityKit VideoMaterial
+- **Performance:** Limit simultaneous video playback to 3-4 for frame rate
+
+## 13) Implementation Phases
+
+### Phase 1: Core MVP (Weeks 1-2)
+- [ ] Project setup: Xcode, ARKit, basic UI
+- [ ] AR image tracking with single test image
+- [ ] Video playback on detected plane
+- [ ] Basic camera view UI
+
+### Phase 2: NFT Integration (Weeks 3-4)
+- [ ] Etherscan/Alchemy API integration
+- [ ] Metadata parser for ERC-721/1155
+- [ ] IPFS download manager
+- [ ] Collection import flow
+
+### Phase 3: Collection Management (Week 5)
+- [ ] Collections list UI
+- [ ] Local storage and caching
+- [ ] Search and filtering
+- [ ] Delete/refresh collections
+
+### Phase 4: Premium & Polish (Week 6)
+- [ ] In-app purchase integration
+- [ ] Free vs premium tier logic
+- [ ] Onboarding flow with sample collection
+- [ ] Visual effects (corner highlights, emoji waterfall)
+
+### Phase 5: Testing & Launch (Week 7-8)
+- [ ] TestFlight beta testing
+- [ ] Bug fixes and optimization
+- [ ] App Store assets (screenshots, description)
+- [ ] Privacy policy
+- [ ] Submit for review
+
+## 14) Risk & Mitigation
+
+### 14.1 Technical Risks
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| AR tracking fails on certain NFT images | High | Custom image capture fallback, validate before download |
+| Large video files cause memory issues | Medium | Limit simultaneous playback, compressed formats, streaming |
+| IPFS download slow/unreliable | Medium | Retry logic, multiple gateway fallbacks, progress feedback |
+| Device compatibility (older iPhones) | Low | Require iOS 15+, ARKit 4.0+ (iPhone XS and newer) |
+
+### 14.2 UX Risks
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Users don't understand NFT import flow | High | Clear onboarding, demo collection, help docs |
+| Download sizes too large for mobile data | Medium | Wi-Fi warning, show size estimate, selective download |
+| Tracking requires good lighting | Medium | "Move to better lit area" hints, tutorial |
+
+### 14.3 Business Risks
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Low adoption by artists | High | Direct outreach, partnerships, showcase at NFT events |
+| Premium conversion low | Medium | Clear value prop, trial collections, artist testimonials |
+| Blockchain gas fees barrier | Low | App doesn't require transactions, read-only queries |
+
+## 15) Analytics & Privacy
+
+### 15.1 Tracked Events (On-Device Only)
+\`\`\`json
+{
+  "userId": "device-uuid",
+  "events": [
+    {
+      "timestamp": "2026-01-05T14:32:11Z",
+      "eventType": "trigger_scanned",
+      "collectionAddress": "0x...",
+      "tokenId": "12",
+      "nftName": "Firmware for Nectar",
+      "scanDuration": 4.2,
+      "videoPlayed": true
+    }
+  ]
+}
+\`\`\`
+
+**User-identifiable data:**
+- Device UUID (for unique user count)
+- Collection addresses scanned
+- Token IDs and names
+- Timestamps
+
+**Not tracked:**
+- Location
+- Personal information
+- Network activity beyond app functionality
+
+### 15.2 Privacy Policy
+Standard Apple privacy policy required:
+- Data collected: Scan events, device ID
+- Storage: On-device only, not transmitted
+- User control: Can clear analytics in Settings
+- Camera: Used only for AR scanning, not recorded
+- Third-party: Etherscan/Alchemy API calls (user provides keys)
+
+## 16) Future Enhancements (Post-MVP)
+
+### 16.1 Short-term (3-6 months)
+- Android version (ARCore)
+- Artist dashboard: See scan analytics for their collections
+- Social sharing: Screenshot AR video, share to Instagram/Twitter
+- Collection preview before download: Gallery view
+- Selective NFT download: Choose specific tokens from collection
+- Video quality options: HD vs compressed
+
+### 16.2 Medium-term (6-12 months)
+- Backend API for analytics aggregation
+- Artist verification and featured collections
+- In-app NFT marketplace integration (OpenSea links)
+- AR effects library: Particles, transitions, filters
+- Multi-language support
+- Offline mode improvements
+
+### 16.3 Long-term (12+ months)
+- NFT ownership verification (connect wallet)
+- Exclusive content for NFT holders
+- Creator tools: Upload custom trigger images
+- AR social features: Share sessions, collaborative viewing
+- Integration with physical galleries (QR codes, beacons)
+- Subscription model for artists (analytics, promotion)
+
+## 17) Open Questions & Decisions
+
+### 17.1 To Resolve Before Development
+- [x] Blockchain: Ethereum confirmed
+- [x] NFT standards: ERC-721 and ERC-1155
+- [x] Pricing: $4.99 one-time IAP
+- [x] Platform: iOS first, Android later
+- [ ] **API key distribution:** How will users get Etherscan/Alchemy keys? In-app instructions? Pre-configured demo key?
+- [ ] **Sample collection size:** How many NFTs in "Artificial Flowers"? 5-10 for quick demo?
+- [ ] **Video auto-play sound:** Default muted or unmuted?
+
+### 17.2 Design Decisions Needed
+- [ ] Exact neon accent colors (hex codes)
+- [ ] Icon design: Mockup needed for app icon with cherry + A/I letters
+- [ ] Emoji waterfall animation: Duration, frequency, physics?
+- [ ] Corner highlight style: Solid lines, dashed, glowing?
+
+### 17.3 Technical Investigations
+- [ ] RealityKit vs SceneKit for video rendering (performance comparison)
+- [ ] IPFS gateway reliability: Test multiple providers
+- [ ] ARKit image tracking limits: Max simultaneous tracked images in practice
+- [ ] Video codec: H.264 vs HEVC for iOS (compatibility vs file size)
+
+## 18) Success Metrics
+
+### 18.1 MVP Launch Goals
+- 50 beta testers via TestFlight
+- 10 artist collections imported
+- Average 5 scans per user per week
+- < 5% crash rate
+- App Store approval on first submission
+
+### 18.2 3-Month Goals
+- 500 active users
+- 50 premium conversions (10% conversion rate)
+- 100 NFT collections in the wild
+- 4.5+ star App Store rating
+- Featured artist showcase on social media
+
+### 18.3 Key Performance Indicators
+- **User retention:** Day 1, Day 7, Day 30
+- **Collection import rate:** % of users who import ≥1 collection
+- **Premium conversion:** Free → Paid %
+- **Scan engagement:** Avg scans per user per session
+- **Technical:** Crash-free rate, AR tracking success rate
+
+## 19) Appendix
+
+### 19.1 Example NFT Collections for Testing
+1. **Artificial Flowers** (bundled sample)
+2. **MintFace Geodetic Series** (if available)
+3. Test collection with 5-10 diverse images (portraits, landscapes, abstract)
+
+### 19.2 Resources & References
+- [ARKit Image Tracking](https://developer.apple.com/documentation/arkit/arkit_in_ios/content_anchors/tracking_and_visualizing_images)
+- [ERC-721 Standard](https://eips.ethereum.org/EIPS/eip-721)
+- [ERC-1155 Standard](https://eips.ethereum.org/EIPS/eip-1155)
+- [Arweave Documentation](https://docs.arweave.org/)
+- [Etherscan API](https://docs.etherscan.io/)
+- [Alchemy NFT API](https://docs.alchemy.com/reference/nft-api)
+
+### 19.3 Design Assets Needed
+- [ ] App icon (1024x1024)
+- [ ] Logo variations (light/dark)
+- [ ] Onboarding tutorial images
+- [ ] App Store screenshots (6.5", 5.5" displays)
+- [ ] Promotional artwork
+- [ ] Sample collection: "Artificial Flowers" NFTs
+
+---
+
+**Document Version:** 1.0
+**Last Updated:** 2026-01-05
+**Author:** MintFace
+**Status:** Ready for Implementation
