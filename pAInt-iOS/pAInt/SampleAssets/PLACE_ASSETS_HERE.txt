@@ -1,0 +1,23 @@
+Place your test assets in this directory:
+
+1. test_trigger.jpg
+   - High resolution trigger image (2000x2000px+)
+   - Print this image for AR tracking testing
+   - Should have high detail and contrast
+
+2. test_video.mp4
+   - MP4 video file (H.264 + AAC codec)
+   - Duration: 5-20 seconds recommended
+   - Will play on the detected trigger image
+
+After adding files, drag this SampleAssets folder into your Xcode project:
+- Right-click in Xcode project navigator
+- Select "Add Files to pAInt..."
+- Select SampleAssets folder
+- Choose "Create folder references" (blue folder icon)
+- Ensure "pAInt" target is checked
+
+Recommended test content:
+- Use existing MintFace NFT artwork as trigger
+- Use corresponding animation video for that NFT
+- This will simulate the real app experience
