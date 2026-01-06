@@ -15,7 +15,7 @@ struct NFTCollection: Codable {
     let name: String
     let symbol: String?
     let totalSupply: Int
-    let tokens: [NFTToken]
+    var tokens: [NFTToken]
     let downloadedAt: Date
 
     var storageSize: Int64 {

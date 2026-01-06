@@ -17,15 +17,24 @@ class ARViewController: UIViewController {
     private var arView: ARSCNView!
     private var statusLabel: UILabel!
     private var soundButton: UIButton!
+    private var importButton: UIButton!
 
+    private var collectionManager: CollectionManager!
     private var videoPlayers: [String: AVPlayer] = [:]
     private var videoNodes: [String: SKVideoNode] = [:]
+    private var tokenLookup: [String: NFTToken] = [:] // Map trigger name -> token
     private var isMuted: Bool = true
 
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        // Initialize CollectionManager
+        // TODO: Get API key from Settings/UserDefaults
+        let apiKey = "YOUR_ALCHEMY_API_KEY" // Replace with actual key
+        collectionManager = CollectionManager(alchemyAPIKey: apiKey, isPremium: false)
+
         setupUI()
         setupAR()
     }
@@ -98,6 +107,22 @@ class ARViewController: UIViewController {
         soundButton.addTarget(self, action: #selector(toggleSound), for: .touchUpInside)
         view.addSubview(soundButton)
 
+        // Import Button
+        importButton = UIButton(type: .system)
+        importButton.translatesAutoresizingMaskIntoConstraints = false
+        importButton.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
+        importButton.tintColor = .white
+        importButton.backgroundColor = UIColor(red: 0.33, green: 0.31, blue: 0.36, alpha: 0.85)
+        importButton.layer.cornerRadius = 28
+        importButton.layer.borderWidth = 1
+        importButton.layer.borderColor = UIColor(white: 1.0, alpha: 0.15).cgColor
+        importButton.layer.shadowColor = UIColor.black.cgColor
+        importButton.layer.shadowOffset = CGSize(width: 0, height: 2)
+        importButton.layer.shadowOpacity = 0.3
+        importButton.layer.shadowRadius = 4
+        importButton.addTarget(self, action: #selector(showImportDialog), for: .touchUpInside)
+        view.addSubview(importButton)
+
         // Constraints
         NSLayoutConstraint.activate([
             statusLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
@@ -108,7 +133,12 @@ class ARViewController: UIViewController {
             soundButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
             soundButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
             soundButton.widthAnchor.constraint(equalToConstant: 56),
-            soundButton.heightAnchor.constraint(equalToConstant: 56)
+            soundButton.heightAnchor.constraint(equalToConstant: 56),
+
+            importButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+            importButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            importButton.widthAnchor.constraint(equalToConstant: 56),
+            importButton.heightAnchor.constraint(equalToConstant: 56)
         ])
     }
 
@@ -138,35 +168,75 @@ class ARViewController: UIViewController {
     }
 
     private func loadReferenceImages() -> Set<ARReferenceImage>? {
-        // For prototype: Load test image from bundle
-        // In production, this will load from NFT collection data
-
         var referenceImages = Set<ARReferenceImage>()
 
-        // Try to load test image from bundle
-        if let testImagePath = Bundle.main.path(forResource: "test_trigger", ofType: "jpg"),
-           let testImage = UIImage(contentsOfFile: testImagePath),
-           let cgImage = testImage.cgImage {
+        // Load from collections
+        for collection in collectionManager.collections {
+            for token in collection.tokens {
+                guard let imagePath = token.localImagePath else { continue }
 
-            // Physical width of 0.3 meters (30cm) - adjust based on your test print
-            let referenceImage = ARReferenceImage(cgImage, orientation: .up, physicalWidth: 0.3)
-            referenceImage.name = "test_trigger"
-            referenceImages.insert(referenceImage)
+                // Load image
+                guard let image = UIImage(contentsOfFile: imagePath),
+                      let cgImage = image.cgImage else { continue }
+
+                // Determine physical width from image details or use default
+                let physicalWidth: CGFloat
+                if let details = token.imageDetails, let width = details.width, let height = details.height {
+                    // Use aspect ratio to estimate physical width (assume 30cm standard)
+                    let aspectRatio = CGFloat(width) / CGFloat(height)
+                    physicalWidth = aspectRatio > 1.0 ? 0.4 : 0.3 // Landscape: 40cm, Portrait: 30cm
+                } else {
+                    physicalWidth = 0.3 // Default: 30cm
+                }
+
+                // Create reference image
+                let referenceImage = ARReferenceImage(cgImage, orientation: .up, physicalWidth: physicalWidth)
+                let triggerName = "token_\(collection.contractAddress)_\(token.tokenId)"
+                referenceImage.name = triggerName
+
+                referenceImages.insert(referenceImage)
+
+                // Store token for lookup
+                tokenLookup[triggerName] = token
+
+                print("Loaded trigger: \(token.name)")
+            }
         }
 
+        // Fallback: Load test image from bundle if no collections
+        if referenceImages.isEmpty {
+            if let testImagePath = Bundle.main.path(forResource: "test_trigger", ofType: "jpg"),
+               let testImage = UIImage(contentsOfFile: testImagePath),
+               let cgImage = testImage.cgImage {
+
+                let referenceImage = ARReferenceImage(cgImage, orientation: .up, physicalWidth: 0.3)
+                referenceImage.name = "test_trigger"
+                referenceImages.insert(referenceImage)
+            }
+        }
+
+        print("Loaded \(referenceImages.count) reference images for AR tracking")
         return referenceImages.isEmpty ? nil : referenceImages
     }
 
     // MARK: - Video Playback
 
     private func playVideo(for imageName: String, on anchor: ARAnchor, imageSize: CGSize) {
-        // Get video path
-        guard let videoPath = Bundle.main.path(forResource: "test_video", ofType: "mp4") else {
-            print("Video file not found")
-            return
+        // Get video path from token
+        var videoURL: URL?
+
+        if let token = tokenLookup[imageName], let videoPath = token.localVideoPath {
+            // Use NFT collection video
+            videoURL = URL(fileURLWithPath: videoPath)
+        } else if let testVideoPath = Bundle.main.path(forResource: "test_video", ofType: "mp4") {
+            // Fallback to test video
+            videoURL = URL(fileURLWithPath: testVideoPath)
         }
 
-        let videoURL = URL(fileURLWithPath: videoPath)
+        guard let videoURL = videoURL else {
+            print("Video file not found for \(imageName)")
+            return
+        }
 
         // Create video player
         let player = AVPlayer(url: videoURL)
@@ -230,6 +300,61 @@ class ARViewController: UIViewController {
         // Update button icon
         let iconName = isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill"
         soundButton.setImage(UIImage(systemName: iconName), for: .normal)
+    }
+
+    @objc private func showImportDialog() {
+        let alert = UIAlertController(
+            title: "Import NFT Collection",
+            message: "Enter the Ethereum contract address of your NFT collection",
+            preferredStyle: .alert
+        )
+
+        alert.addTextField { textField in
+            textField.placeholder = "0x..."
+            textField.autocapitalizationType = .none
+            textField.autocorrectionType = .no
+            textField.keyboardType = .asciiCapable
+        }
+
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+
+        alert.addAction(UIAlertAction(title: "Import", style: .default) { [weak self] _ in
+            guard let self = self,
+                  let contractAddress = alert.textFields?.first?.text,
+                  !contractAddress.isEmpty else { return }
+
+            self.importCollection(contractAddress: contractAddress)
+        })
+
+        present(alert, animated: true)
+    }
+
+    private func importCollection(contractAddress: String) {
+        updateStatus("Importing collection...")
+        importButton.isEnabled = false
+
+        Task {
+            await collectionManager.importCollection(contractAddress: contractAddress)
+
+            await MainActor.run {
+                if let error = collectionManager.error {
+                    updateStatus("Error: \(error)")
+                    showError(error)
+                    importButton.isEnabled = true
+                } else {
+                    updateStatus("Collection imported! Reloading AR...")
+                    // Restart AR session with new collections
+                    startARSession()
+                    importButton.isEnabled = true
+                }
+            }
+        }
+    }
+
+    private func showError(_ message: String) {
+        let alert = UIAlertController(title: "Import Failed", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 
     private func updateStatus(_ text: String) {
