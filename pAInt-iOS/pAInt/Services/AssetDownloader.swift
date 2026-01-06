@@ -75,7 +75,7 @@ actor AssetDownloader {
     func downloadCollection(
         _ collection: NFTCollection,
         to baseDirectory: URL,
-        progressHandler: @Sendable @escaping (DownloadProgress) -> Void
+        progressHandler: @Sendable @escaping (DownloadProgress) async -> Void
     ) async throws -> NFTCollection {
 
         var updatedTokens: [NFTToken] = []

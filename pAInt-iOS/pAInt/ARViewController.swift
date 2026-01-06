@@ -279,7 +279,7 @@ class ARViewController: UIViewController {
             forName: .AVPlayerItemDidPlayToEndTime,
             object: player.currentItem,
             queue: .main
-        ) { [weak self] _ in
+        ) { _ in
             player.seek(to: .zero)
             player.play()
         }
