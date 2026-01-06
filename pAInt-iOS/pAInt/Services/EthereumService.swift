@@ -70,10 +70,22 @@ class EthereumService {
 
             let alchemyResponse = try JSONDecoder().decode(AlchemyNFTResponse.self, from: data)
 
+            print("📦 Received \(alchemyResponse.nfts.count) NFTs from API")
+
             // Extract tokens
             for nft in alchemyResponse.nfts {
+                print("🔍 Processing token #\(nft.tokenId)")
+                print("   - Has metadata: \(nft.metadata != nil)")
+                if let metadata = nft.metadata {
+                    print("   - Image: \(metadata.image ?? "nil")")
+                    print("   - ImageUrl: \(metadata.imageUrl ?? "nil")")
+                }
+
                 if let token = parseNFTToken(from: nft) {
                     allTokens.append(token)
+                    print("   ✅ Added token")
+                } else {
+                    print("   ❌ Skipped (no image)")
                 }
 
                 // Get contract info from first NFT
@@ -95,7 +107,10 @@ class EthereumService {
             totalSupply = allTokens.count
         }
 
+        print("📊 Final result: \(allTokens.count) valid tokens out of total processed")
+
         guard !allTokens.isEmpty else {
+            print("❌ ERROR: No tokens with valid images found")
             throw EthereumError.noNFTsFound
         }
 
