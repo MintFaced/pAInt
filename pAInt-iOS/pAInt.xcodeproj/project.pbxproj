@@ -24,10 +24,10 @@
 		A1000013 /* ARViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARViewController.swift; sourceTree = "<group>"; };
 		A1000014 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1000015 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A1000017 /* NFTMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NFTMetadata.swift; sourceTree = "<group>"; };
-		A1000018 /* EthereumService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EthereumService.swift; sourceTree = "<group>"; };
-		A1000019 /* AssetDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetDownloader.swift; sourceTree = "<group>"; };
-		A100001A /* CollectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionManager.swift; sourceTree = "<group>"; };
+		A1000017 /* NFTMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models/NFTMetadata.swift; sourceTree = "<group>"; };
+		A1000018 /* EthereumService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/EthereumService.swift; sourceTree = "<group>"; };
+		A1000019 /* AssetDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/AssetDownloader.swift; sourceTree = "<group>"; };
+		A100001A /* CollectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/CollectionManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,38 +63,14 @@
 				A1000011 /* AppDelegate.swift */,
 				A1000012 /* SceneDelegate.swift */,
 				A1000013 /* ARViewController.swift */,
-				A1000026 /* Models */,
-				A1000027 /* Services */,
-				A1000028 /* Managers */,
+				A1000017 /* NFTMetadata.swift */,
+				A1000018 /* EthereumService.swift */,
+				A1000019 /* AssetDownloader.swift */,
+				A100001A /* CollectionManager.swift */,
 				A1000014 /* Assets.xcassets */,
 				A1000015 /* Info.plist */,
 			);
 			path = pAInt;
-			sourceTree = "<group>";
-		};
-		A1000026 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				A1000017 /* NFTMetadata.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		A1000027 /* Services */ = {
-			isa = PBXGroup;
-			children = (
-				A1000018 /* EthereumService.swift */,
-				A1000019 /* AssetDownloader.swift */,
-			);
-			path = Services;
-			sourceTree = "<group>";
-		};
-		A1000028 /* Managers */ = {
-			isa = PBXGroup;
-			children = (
-				A100001A /* CollectionManager.swift */,
-			);
-			path = Managers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
