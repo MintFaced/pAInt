@@ -157,7 +157,7 @@ class EthereumService {
 
         return NFTToken(
             tokenId: nft.tokenId,
-            name: metadata.name ?? nft.title,
+            name: metadata.name ?? nft.title ?? "Token #\(nft.tokenId)",
             imageURL: normalizeURL(imageURL),
             animationURL: animationURL != nil ? normalizeURL(animationURL!) : nil,
             imageDetails: metadata.imageDetails,

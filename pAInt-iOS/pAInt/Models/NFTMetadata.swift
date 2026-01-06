@@ -100,8 +100,8 @@ struct AlchemyNFTResponse: Codable {
 
 struct AlchemyNFT: Codable {
     let tokenId: String
-    let tokenType: String
-    let title: String
+    let tokenType: String?
+    let title: String?
     let description: String?
     let metadata: NFTMetadataRaw?
     let contract: ContractInfo
