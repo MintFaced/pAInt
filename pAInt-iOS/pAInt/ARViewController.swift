@@ -9,7 +9,6 @@
 import UIKit
 import ARKit
 import AVFoundation
-import SpriteKit
 
 class ARViewController: UIViewController {
 
@@ -18,12 +17,9 @@ class ARViewController: UIViewController {
     private var arView: ARSCNView!
     private var statusLabel: UILabel!
     private var soundButton: UIButton!
-    private var emojiOverlay: SKView!
-    private var emojiScene: SKScene!
 
     private var videoPlayers: [String: AVPlayer] = [:]
     private var videoNodes: [String: SKVideoNode] = [:]
-    private var cornerHighlights: [String: SCNNode] = [:]
     private var isMuted: Bool = true
 
     // MARK: - Lifecycle
@@ -58,15 +54,6 @@ class ARViewController: UIViewController {
         arView.delegate = self
         arView.automaticallyUpdatesLighting = true
         view.addSubview(arView)
-
-        // Emoji Overlay (SpriteKit for particle effects)
-        emojiOverlay = SKView(frame: view.bounds)
-        emojiOverlay.backgroundColor = .clear
-        emojiOverlay.isUserInteractionEnabled = false
-        emojiScene = SKScene(size: view.bounds.size)
-        emojiScene.backgroundColor = .clear
-        emojiOverlay.presentScene(emojiScene)
-        view.addSubview(emojiOverlay)
 
         // Status Label - Enhanced styling
         statusLabel = UILabel()
@@ -260,126 +247,51 @@ class ARViewController: UIViewController {
         }
     }
 
-    // MARK: - Corner Highlights
+    // MARK: - Frame Border
 
-    private func addCornerHighlights(to node: SCNNode, imageSize: CGSize) {
-        let cornerLength: CGFloat = 0.05 // 5cm lines
-        let cornerWidth: CGFloat = 0.003 // 3mm thickness
-        let cornerHeight: CGFloat = 0.002
+    private func addFrameBorder(to node: SCNNode, imageSize: CGSize) {
+        // Frame width is 5% of image width
+        let frameWidth = imageSize.width * 0.05
+        let frameDepth: CGFloat = 0.002 // 2mm depth for subtle 3D effect
 
-        // Create glowing material
-        let material = SCNMaterial()
-        material.diffuse.contents = UIColor(red: 0.0, green: 0.8, blue: 1.0, alpha: 1.0) // Electric blue
-        material.emission.contents = UIColor(red: 0.0, green: 0.8, blue: 1.0, alpha: 0.8)
-        material.isDoubleSided = true
+        // Almost black frame color (deep charcoal)
+        let frameMaterial = SCNMaterial()
+        frameMaterial.diffuse.contents = UIColor(red: 0.08, green: 0.08, blue: 0.08, alpha: 1.0) // Very dark grey, almost black
+        frameMaterial.metalness.contents = 0.3 // Slight metallic sheen
+        frameMaterial.roughness.contents = 0.7 // Matte finish
 
         let halfWidth = imageSize.width / 2
         let halfHeight = imageSize.height / 2
 
-        // Corner positions (4 corners of the image)
-        let corners: [(x: CGFloat, z: CGFloat, rotations: [(axis: SCNVector3, angle: CGFloat)])] = [
-            // Top-left
-            (x: -halfWidth, z: -halfHeight, rotations: [
-                (SCNVector3(0, 1, 0), 0),
-                (SCNVector3(0, 1, 0), .pi / 2)
-            ]),
-            // Top-right
-            (x: halfWidth, z: -halfHeight, rotations: [
-                (SCNVector3(0, 1, 0), 0),
-                (SCNVector3(0, 1, 0), -.pi / 2)
-            ]),
-            // Bottom-left
-            (x: -halfWidth, z: halfHeight, rotations: [
-                (SCNVector3(0, 1, 0), .pi),
-                (SCNVector3(0, 1, 0), .pi / 2)
-            ]),
-            // Bottom-right
-            (x: halfWidth, z: halfHeight, rotations: [
-                (SCNVector3(0, 1, 0), .pi),
-                (SCNVector3(0, 1, 0), -.pi / 2)
-            ])
-        ]
+        // Create 4 frame sides
 
-        for corner in corners {
-            for rotation in corner.rotations {
-                let line = SCNBox(width: cornerLength, height: cornerHeight, length: cornerWidth, chamferRadius: 0)
-                line.materials = [material]
+        // Top frame
+        let topFrame = SCNBox(width: imageSize.width + (frameWidth * 2), height: frameDepth, length: frameWidth, chamferRadius: 0)
+        topFrame.materials = [frameMaterial]
+        let topNode = SCNNode(geometry: topFrame)
+        topNode.position = SCNVector3(0, 0.001, -halfHeight - (frameWidth / 2))
+        node.addChildNode(topNode)
 
-                let lineNode = SCNNode(geometry: line)
-                lineNode.position = SCNVector3(corner.x, 0.01, corner.z)
-                lineNode.eulerAngles = SCNVector3(0, rotation.angle, 0)
+        // Bottom frame
+        let bottomFrame = SCNBox(width: imageSize.width + (frameWidth * 2), height: frameDepth, length: frameWidth, chamferRadius: 0)
+        bottomFrame.materials = [frameMaterial]
+        let bottomNode = SCNNode(geometry: bottomFrame)
+        bottomNode.position = SCNVector3(0, 0.001, halfHeight + (frameWidth / 2))
+        node.addChildNode(bottomNode)
 
-                node.addChildNode(lineNode)
+        // Left frame
+        let leftFrame = SCNBox(width: frameWidth, height: frameDepth, length: imageSize.height, chamferRadius: 0)
+        leftFrame.materials = [frameMaterial]
+        let leftNode = SCNNode(geometry: leftFrame)
+        leftNode.position = SCNVector3(-halfWidth - (frameWidth / 2), 0.001, 0)
+        node.addChildNode(leftNode)
 
-                // Animate glow
-                let glowAction = SCNAction.sequence([
-                    SCNAction.fadeOpacity(to: 0.3, duration: 0.8),
-                    SCNAction.fadeOpacity(to: 1.0, duration: 0.8)
-                ])
-                lineNode.runAction(SCNAction.repeatForever(glowAction))
-            }
-        }
-    }
-
-    // MARK: - Emoji Waterfall
-
-    private func triggerEmojiWaterfall() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-
-            // Create party hat emojis
-            self.createEmojiNode(emoji: "🎉", duration: 3.0)
-
-            // Create cherry emojis (slightly delayed)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                self.createEmojiNode(emoji: "🍒", duration: 3.0)
-            }
-
-            // Second wave
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                self.createEmojiNode(emoji: "🎉", duration: 3.0)
-            }
-        }
-    }
-
-    private func createEmojiNode(emoji: String, duration: TimeInterval) {
-        let numberOfEmojis = 15
-        let screenWidth = emojiScene.size.width
-        let screenHeight = emojiScene.size.height
-
-        for i in 0..<numberOfEmojis {
-            let label = SKLabelNode(text: emoji)
-            label.fontSize = CGFloat.random(in: 30...50)
-            label.position = CGPoint(
-                x: CGFloat.random(in: 0...screenWidth),
-                y: screenHeight + 50
-            )
-            label.zRotation = CGFloat.random(in: -0.3...0.3)
-
-            emojiScene.addChild(label)
-
-            // Animate falling with rotation
-            let fallDistance = screenHeight + 100
-            let fallDuration = duration + Double.random(in: -0.5...0.5)
-            let delay = Double(i) * 0.1
-
-            let fall = SKAction.moveBy(x: CGFloat.random(in: -50...50), y: -fallDistance, duration: fallDuration)
-            let rotate = SKAction.rotate(byAngle: CGFloat.random(in: -.pi...(2 * .pi)), duration: fallDuration)
-            let fade = SKAction.fadeOut(withDuration: fallDuration * 0.3)
-            let group = SKAction.group([fall, rotate])
-            let sequence = SKAction.sequence([
-                SKAction.wait(forDuration: delay),
-                group,
-                SKAction.removeFromParent()
-            ])
-
-            label.run(sequence)
-
-            // Add fade at the end
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay + fallDuration * 0.7) {
-                label.run(fade)
-            }
-        }
+        // Right frame
+        let rightFrame = SCNBox(width: frameWidth, height: frameDepth, length: imageSize.height, chamferRadius: 0)
+        rightFrame.materials = [frameMaterial]
+        let rightNode = SCNNode(geometry: rightFrame)
+        rightNode.position = SCNVector3(halfWidth + (frameWidth / 2), 0.001, 0)
+        node.addChildNode(rightNode)
     }
 }
 
@@ -397,12 +309,8 @@ extension ARViewController: ARSCNViewDelegate {
         print("Detected image: \(imageName)")
         updateStatus("Found: \(imageName)")
 
-        // Add corner highlights to the detected image
-        addCornerHighlights(to: node, imageSize: imageSize)
-        cornerHighlights[imageName] = node
-
-        // Trigger emoji waterfall celebration
-        triggerEmojiWaterfall()
+        // Add elegant frame border around the detected image
+        addFrameBorder(to: node, imageSize: imageSize)
 
         // Play video on detected image
         DispatchQueue.main.async { [weak self] in
