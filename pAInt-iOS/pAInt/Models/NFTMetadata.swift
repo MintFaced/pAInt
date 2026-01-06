@@ -93,8 +93,8 @@ struct NFTAttribute: Codable {
 // MARK: - API Response Models
 
 struct AlchemyNFTResponse: Codable {
-    let ownedNfts: [AlchemyNFT]
-    let totalCount: Int
+    let nfts: [AlchemyNFT]
+    let totalCount: Int?
     let pageKey: String?
 }
 

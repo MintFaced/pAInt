@@ -71,7 +71,7 @@ class EthereumService {
             let alchemyResponse = try JSONDecoder().decode(AlchemyNFTResponse.self, from: data)
 
             // Extract tokens
-            for nft in alchemyResponse.ownedNfts {
+            for nft in alchemyResponse.nfts {
                 if let token = parseNFTToken(from: nft) {
                     allTokens.append(token)
                 }
