@@ -72,10 +72,8 @@ class CollectionManager: ObservableObject {
             let downloadedCollection = try await assetDownloader.downloadCollection(
                 collection,
                 to: collectionDir
-            ) { [weak self] progress in
-                await MainActor.run {
-                    self?.downloadProgress = progress
-                }
+            ) { @MainActor [weak self] progress in
+                self?.downloadProgress = progress
             }
 
             // Step 3: Save collection metadata
