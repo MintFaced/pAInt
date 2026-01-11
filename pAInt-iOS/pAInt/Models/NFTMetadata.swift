@@ -104,6 +104,7 @@ struct AlchemyNFT: Codable {
     let title: String?
     let description: String?
     let metadata: NFTMetadataRaw?
+    let raw: RawMetadata?
     let contract: ContractInfo
 
     struct ContractInfo: Codable {
@@ -111,6 +112,10 @@ struct AlchemyNFT: Codable {
         let name: String?
         let symbol: String?
         let totalSupply: String?
+    }
+
+    struct RawMetadata: Codable {
+        let metadata: NFTMetadataRaw?
     }
 }
 

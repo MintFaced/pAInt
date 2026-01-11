@@ -76,7 +76,8 @@ class EthereumService {
             for nft in alchemyResponse.nfts {
                 print("🔍 Processing token #\(nft.tokenId)")
                 print("   - Has metadata: \(nft.metadata != nil)")
-                if let metadata = nft.metadata {
+                print("   - Has raw.metadata: \(nft.raw?.metadata != nil)")
+                if let metadata = nft.metadata ?? nft.raw?.metadata {
                     print("   - Image: \(metadata.image ?? "nil")")
                     print("   - ImageUrl: \(metadata.imageUrl ?? "nil")")
                 }
@@ -150,7 +151,7 @@ class EthereumService {
     // MARK: - Private Methods
 
     private func buildNFTsURL(contractAddress: String, pageKey: String?) -> URL {
-        var urlString = "\(baseURL)/\(alchemyAPIKey)/getNFTsForContract?contractAddress=\(contractAddress)&withMetadata=true"
+        var urlString = "\(baseURL)/\(alchemyAPIKey)/getNFTsForContract?contractAddress=\(contractAddress)&withMetadata=true&refreshCache=true"
 
         if let pageKey = pageKey {
             urlString += "&pageKey=\(pageKey)"
@@ -160,7 +161,8 @@ class EthereumService {
     }
 
     private func parseNFTToken(from nft: AlchemyNFT) -> NFTToken? {
-        guard let metadata = nft.metadata else { return nil }
+        // Try metadata field first, then raw.metadata field
+        guard let metadata = nft.metadata ?? nft.raw?.metadata else { return nil }
 
         // Get image URL
         guard let imageURL = metadata.finalImageURL, !imageURL.isEmpty else {
