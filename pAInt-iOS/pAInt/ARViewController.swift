@@ -345,10 +345,10 @@ class ARViewController: UIViewController {
             await MainActor.run {
                 if let error = collectionManager.error {
                     updateStatus("Failed")
-                    NSLog("❌ Import failed with error: %@", error.localizedDescription)
+                    NSLog("❌ Import failed with error: %@", error)
 
                     // Show detailed error
-                    let msg = "Contract: \(contractAddress)\n\nError: \(error.localizedDescription)\n\nAPI Key: \(apiKeyPreview)\n\nCheck console for full debug output"
+                    let msg = "Contract: \(contractAddress)\n\nError: \(error)\n\nAPI Key: \(apiKeyPreview)\n\nCheck console for full debug output"
                     showError(msg)
                     importButton.isEnabled = true
                 } else {
