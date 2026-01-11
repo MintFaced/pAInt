@@ -61,32 +61,31 @@ class EthereumService {
         repeat {
             let url = buildNFTsURL(contractAddress: contractAddress, pageKey: pageKey)
 
-            print("🌐 Making API request to:")
-            print("   URL: \(url.absoluteString)")
+            NSLog("🌐 Making API request to: %@", url.absoluteString)
 
             let (data, response) = try await URLSession.shared.data(from: url)
 
-            print("📡 Response received:")
+            NSLog("📡 Response received")
             if let httpResponse = response as? HTTPURLResponse {
-                print("   Status code: \(httpResponse.statusCode)")
-                print("   Headers: \(httpResponse.allHeaderFields)")
+                NSLog("   Status code: %d", httpResponse.statusCode)
+                NSLog("   Headers: %@", String(describing: httpResponse.allHeaderFields))
             }
-            print("   Data size: \(data.count) bytes")
+            NSLog("   Data size: %d bytes", data.count)
 
             // Log raw response for debugging
             if let responseString = String(data: data, encoding: .utf8) {
-                print("   Raw response: \(responseString.prefix(500))...")
+                NSLog("   Raw response: %@", String(responseString.prefix(500)))
             }
 
             guard let httpResponse = response as? HTTPURLResponse else {
-                print("❌ Response is not HTTPURLResponse")
+                NSLog("❌ Response is not HTTPURLResponse")
                 throw EthereumError.invalidResponse
             }
 
             guard httpResponse.statusCode == 200 else {
-                print("❌ HTTP Status code: \(httpResponse.statusCode)")
+                NSLog("❌ HTTP Status code: %d", httpResponse.statusCode)
                 if let errorString = String(data: data, encoding: .utf8) {
-                    print("❌ Error response: \(errorString)")
+                    NSLog("❌ Error response: %@", errorString)
                 }
                 throw EthereumError.invalidResponse
             }
@@ -95,30 +94,30 @@ class EthereumService {
             do {
                 alchemyResponse = try JSONDecoder().decode(AlchemyNFTResponse.self, from: data)
             } catch {
-                print("❌ JSON Decode Error: \(error)")
+                NSLog("❌ JSON Decode Error: %@", error.localizedDescription)
                 if let responseString = String(data: data, encoding: .utf8) {
-                    print("❌ Failed to parse response: \(responseString)")
+                    NSLog("❌ Failed to parse response: %@", responseString)
                 }
                 throw EthereumError.invalidResponse
             }
 
-            print("📦 Received \(alchemyResponse.nfts.count) NFTs from API")
+            NSLog("📦 Received %d NFTs from API", alchemyResponse.nfts.count)
 
             // Extract tokens
             for nft in alchemyResponse.nfts {
-                print("🔍 Processing token #\(nft.tokenId)")
-                print("   - Has metadata: \(nft.metadata != nil)")
-                print("   - Has raw.metadata: \(nft.raw?.metadata != nil)")
+                NSLog("🔍 Processing token #%@", nft.tokenId)
+                NSLog("   - Has metadata: %d", nft.metadata != nil)
+                NSLog("   - Has raw.metadata: %d", nft.raw?.metadata != nil)
                 if let metadata = nft.metadata ?? nft.raw?.metadata {
-                    print("   - Image: \(metadata.image ?? "nil")")
-                    print("   - ImageUrl: \(metadata.imageUrl ?? "nil")")
+                    NSLog("   - Image: %@", metadata.image ?? "nil")
+                    NSLog("   - ImageUrl: %@", metadata.imageUrl ?? "nil")
                 }
 
                 if let token = parseNFTToken(from: nft) {
                     allTokens.append(token)
-                    print("   ✅ Added token")
+                    NSLog("   ✅ Added token")
                 } else {
-                    print("   ❌ Skipped (no image)")
+                    NSLog("   ❌ Skipped (no image)")
                 }
 
                 // Get contract info from first NFT
@@ -140,10 +139,10 @@ class EthereumService {
             totalSupply = allTokens.count
         }
 
-        print("📊 Final result: \(allTokens.count) valid tokens out of total processed")
+        NSLog("📊 Final result: %d valid tokens out of total processed", allTokens.count)
 
         guard !allTokens.isEmpty else {
-            print("❌ ERROR: No tokens with valid images found")
+            NSLog("❌ ERROR: No tokens with valid images found")
             throw EthereumError.noNFTsFound
         }
 
@@ -233,27 +232,27 @@ class EthereumService {
 
     private func isValidAddress(_ address: String) -> Bool {
         // Ethereum addresses are 42 characters (0x + 40 hex chars)
-        print("🔍 Validating address: '\(address)'")
-        print("   - Length: \(address.count) (expected: 42)")
-        print("   - Has 0x prefix: \(address.hasPrefix("0x"))")
+        NSLog("🔍 Validating address: '%@'", address)
+        NSLog("   - Length: %d (expected: 42)", address.count)
+        NSLog("   - Has 0x prefix: %d", address.hasPrefix("0x"))
 
         guard address.count == 42 else {
-            print("   ❌ Invalid length")
+            NSLog("   ❌ Invalid length")
             return false
         }
         guard address.hasPrefix("0x") else {
-            print("   ❌ Missing 0x prefix")
+            NSLog("   ❌ Missing 0x prefix")
             return false
         }
 
         let hexChars = address.dropFirst(2)
         let isValidHex = hexChars.allSatisfy { $0.isHexDigit }
-        print("   - Is valid hex: \(isValidHex)")
+        NSLog("   - Is valid hex: %d", isValidHex)
 
         if !isValidHex {
-            print("   ❌ Contains non-hex characters")
+            NSLog("   ❌ Contains non-hex characters")
         } else {
-            print("   ✅ Valid address")
+            NSLog("   ✅ Valid address")
         }
 
         return isValidHex
