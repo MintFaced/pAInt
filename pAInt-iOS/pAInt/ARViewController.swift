@@ -320,7 +320,7 @@ class ARViewController: UIViewController {
 
         alert.addAction(UIAlertAction(title: "Import", style: .default) { [weak self] _ in
             guard let self = self,
-                  let contractAddress = alert.textFields?.first?.text,
+                  let contractAddress = alert.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines),
                   !contractAddress.isEmpty else { return }
 
             self.importCollection(contractAddress: contractAddress)

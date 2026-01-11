@@ -201,10 +201,29 @@ class EthereumService {
 
     private func isValidAddress(_ address: String) -> Bool {
         // Ethereum addresses are 42 characters (0x + 40 hex chars)
-        guard address.count == 42 else { return false }
-        guard address.hasPrefix("0x") else { return false }
+        print("🔍 Validating address: '\(address)'")
+        print("   - Length: \(address.count) (expected: 42)")
+        print("   - Has 0x prefix: \(address.hasPrefix("0x"))")
+
+        guard address.count == 42 else {
+            print("   ❌ Invalid length")
+            return false
+        }
+        guard address.hasPrefix("0x") else {
+            print("   ❌ Missing 0x prefix")
+            return false
+        }
 
         let hexChars = address.dropFirst(2)
-        return hexChars.allSatisfy { $0.isHexDigit }
+        let isValidHex = hexChars.allSatisfy { $0.isHexDigit }
+        print("   - Is valid hex: \(isValidHex)")
+
+        if !isValidHex {
+            print("   ❌ Contains non-hex characters")
+        } else {
+            print("   ✅ Valid address")
+        }
+
+        return isValidHex
     }
 }
