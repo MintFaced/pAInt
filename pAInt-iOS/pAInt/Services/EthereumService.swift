@@ -26,7 +26,7 @@ enum EthereumError: Error {
         case .noNFTsFound:
             return "No NFTs found in this collection."
         case .apiKeyMissing:
-            return "Alchemy API key is missing. Please add it in Settings."
+            return "API key is missing. Please add it in Settings."
         }
     }
 }
@@ -35,104 +35,111 @@ class EthereumService {
 
     // MARK: - Properties
 
-    private let alchemyAPIKey: String
-    private let baseURL = "https://eth-mainnet.g.alchemy.com/nft/v3"
+    private let baseURL = "https://api.opensea.io/api/v2/chain/ethereum/contract"
 
     // MARK: - Initialization
 
     init(apiKey: String) {
-        self.alchemyAPIKey = apiKey
+        // OpenSea doesn't require API key for basic public reads
+        NSLog("🔧 EthereumService initialized with OpenSea API")
     }
 
     // MARK: - Public Methods
 
     /// Fetch all NFTs from a contract address
     func fetchCollection(contractAddress: String) async throws -> NFTCollection {
+        NSLog("🚀 fetchCollection called for: %@", contractAddress)
+
         guard isValidAddress(contractAddress) else {
+            NSLog("❌ Invalid contract address format")
             throw EthereumError.invalidContractAddress
         }
 
         var allTokens: [NFTToken] = []
-        var pageKey: String? = nil
+        var nextCursor: String? = nil
         var contractName: String = ""
         var contractSymbol: String? = nil
         var totalSupply: Int = 0
+        var pageCount = 0
+        let maxPages = 5  // Limit to 5 pages (~250 NFTs) for now
 
         repeat {
-            let url = buildNFTsURL(contractAddress: contractAddress, pageKey: pageKey)
+            pageCount += 1
+            NSLog("📄 Fetching page %d", pageCount)
+
+            let url = buildNFTsURL(contractAddress: contractAddress, cursor: nextCursor)
 
             NSLog("🌐 Making API request to: %@", url.absoluteString)
 
-            let (data, response) = try await URLSession.shared.data(from: url)
-
-            NSLog("📡 Response received")
-            if let httpResponse = response as? HTTPURLResponse {
-                NSLog("   Status code: %d", httpResponse.statusCode)
-                NSLog("   Headers: %@", String(describing: httpResponse.allHeaderFields))
-            }
-            NSLog("   Data size: %d bytes", data.count)
-
-            // Log raw response for debugging
-            if let responseString = String(data: data, encoding: .utf8) {
-                NSLog("   Raw response: %@", String(responseString.prefix(500)))
-            }
-
-            guard let httpResponse = response as? HTTPURLResponse else {
-                NSLog("❌ Response is not HTTPURLResponse")
-                throw EthereumError.invalidResponse
-            }
-
-            guard httpResponse.statusCode == 200 else {
-                NSLog("❌ HTTP Status code: %d", httpResponse.statusCode)
-                if let errorString = String(data: data, encoding: .utf8) {
-                    NSLog("❌ Error response: %@", errorString)
-                }
-                throw EthereumError.invalidResponse
-            }
-
-            let alchemyResponse: AlchemyNFTResponse
             do {
-                alchemyResponse = try JSONDecoder().decode(AlchemyNFTResponse.self, from: data)
-            } catch {
-                NSLog("❌ JSON Decode Error: %@", error.localizedDescription)
+                let (data, response) = try await URLSession.shared.data(from: url)
+
+                NSLog("📡 Response received")
+                if let httpResponse = response as? HTTPURLResponse {
+                    NSLog("   Status code: %d", httpResponse.statusCode)
+                }
+                NSLog("   Data size: %d bytes", data.count)
+
+                // Log raw response for debugging
                 if let responseString = String(data: data, encoding: .utf8) {
-                    NSLog("❌ Failed to parse response: %@", responseString)
-                }
-                throw EthereumError.invalidResponse
-            }
-
-            NSLog("📦 Received %d NFTs from API", alchemyResponse.nfts.count)
-
-            // Extract tokens
-            for nft in alchemyResponse.nfts {
-                NSLog("🔍 Processing token #%@", nft.tokenId)
-                NSLog("   - Has metadata: %d", nft.metadata != nil)
-                NSLog("   - Has raw.metadata: %d", nft.raw?.metadata != nil)
-                if let metadata = nft.metadata ?? nft.raw?.metadata {
-                    NSLog("   - Image: %@", metadata.image ?? "nil")
-                    NSLog("   - ImageUrl: %@", metadata.imageUrl ?? "nil")
+                    NSLog("   Raw response: %@", String(responseString.prefix(500)))
                 }
 
-                if let token = parseNFTToken(from: nft) {
-                    allTokens.append(token)
-                    NSLog("   ✅ Added token")
-                } else {
-                    NSLog("   ❌ Skipped (no image)")
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    NSLog("❌ Response is not HTTPURLResponse")
+                    throw EthereumError.invalidResponse
                 }
 
-                // Get contract info from first NFT
-                if contractName.isEmpty {
-                    contractName = nft.contract.name ?? "Unknown Collection"
-                    contractSymbol = nft.contract.symbol
-                    if let supply = nft.contract.totalSupply, let supplyInt = Int(supply) {
-                        totalSupply = supplyInt
+                guard httpResponse.statusCode == 200 else {
+                    NSLog("❌ HTTP Status code: %d", httpResponse.statusCode)
+                    if let errorString = String(data: data, encoding: .utf8) {
+                        NSLog("❌ Error response: %@", errorString)
+                    }
+                    throw EthereumError.invalidResponse
+                }
+
+                let openSeaResponse: OpenSeaNFTResponse
+                do {
+                    openSeaResponse = try JSONDecoder().decode(OpenSeaNFTResponse.self, from: data)
+                    NSLog("✅ JSON decoded successfully")
+                } catch {
+                    NSLog("❌ JSON Decode Error: %@", error.localizedDescription)
+                    if let responseString = String(data: data, encoding: .utf8) {
+                        NSLog("❌ Failed to parse response: %@", responseString)
+                    }
+                    throw EthereumError.invalidResponse
+                }
+
+                NSLog("📦 Received %d NFTs from API", openSeaResponse.nfts.count)
+
+                // Extract tokens
+                for nft in openSeaResponse.nfts {
+                    NSLog("🔍 Processing token #%@", nft.identifier)
+
+                    if let token = parseNFTToken(from: nft) {
+                        allTokens.append(token)
+                        NSLog("   ✅ Added token")
+                    } else {
+                        NSLog("   ❌ Skipped (no image)")
+                    }
+
+                    // Get contract info from first NFT
+                    if contractName.isEmpty {
+                        contractName = nft.contract ?? "Unknown Collection"
+                        // OpenSea doesn't provide symbol easily, extract from contract if needed
                     }
                 }
+
+                nextCursor = openSeaResponse.next
+
+            } catch let error as EthereumError {
+                throw error
+            } catch {
+                NSLog("❌ Network error: %@", error.localizedDescription)
+                throw EthereumError.networkError(error)
             }
 
-            pageKey = alchemyResponse.pageKey
-
-        } while pageKey != nil
+        } while nextCursor != nil && pageCount < maxPages
 
         // If totalSupply wasn't in contract info, use count
         if totalSupply == 0 {
@@ -162,7 +169,7 @@ class EthereumService {
             throw EthereumError.invalidContractAddress
         }
 
-        let urlString = "\(baseURL)/\(alchemyAPIKey)/getNFTMetadata?contractAddress=\(contractAddress)&tokenId=\(tokenId)&refreshCache=false"
+        let urlString = "\(baseURL)/\(contractAddress)/nfts/\(tokenId)"
 
         guard let url = URL(string: urlString) else {
             throw EthereumError.invalidResponse
@@ -175,42 +182,42 @@ class EthereumService {
             throw EthereumError.invalidResponse
         }
 
-        let nft = try JSONDecoder().decode(AlchemyNFT.self, from: data)
+        let nft = try JSONDecoder().decode(OpenSeaNFT.self, from: data)
         return parseNFTToken(from: nft)
     }
 
     // MARK: - Private Methods
 
-    private func buildNFTsURL(contractAddress: String, pageKey: String?) -> URL {
-        var urlString = "\(baseURL)/\(alchemyAPIKey)/getNFTsForContract?contractAddress=\(contractAddress)&withMetadata=true&refreshCache=true"
+    private func buildNFTsURL(contractAddress: String, cursor: String?) -> URL {
+        var urlString = "\(baseURL)/\(contractAddress)/nfts?limit=50"
 
-        if let pageKey = pageKey {
-            urlString += "&pageKey=\(pageKey)"
+        if let cursor = cursor {
+            urlString += "&next=\(cursor)"
         }
 
         return URL(string: urlString)!
     }
 
-    private func parseNFTToken(from nft: AlchemyNFT) -> NFTToken? {
-        // Try metadata field first, then raw.metadata field
-        guard let metadata = nft.metadata ?? nft.raw?.metadata else { return nil }
-
-        // Get image URL
-        guard let imageURL = metadata.finalImageURL, !imageURL.isEmpty else {
+    private func parseNFTToken(from nft: OpenSeaNFT) -> NFTToken? {
+        // Get image URL from OpenSea's image_url field
+        guard let imageURL = nft.image_url, !imageURL.isEmpty else {
             return nil // Skip NFTs without images
         }
 
         // Get animation URL (optional)
-        let animationURL = metadata.finalAnimationURL
+        let animationURL = nft.animation_url
+
+        // Use display_image_url if available (usually better quality)
+        let finalImageURL = nft.display_image_url ?? imageURL
 
         return NFTToken(
-            tokenId: nft.tokenId,
-            name: metadata.name ?? nft.title ?? "Token #\(nft.tokenId)",
-            imageURL: normalizeURL(imageURL),
+            tokenId: nft.identifier,
+            name: nft.name ?? "Token #\(nft.identifier)",
+            imageURL: normalizeURL(finalImageURL),
             animationURL: animationURL != nil ? normalizeURL(animationURL!) : nil,
-            imageDetails: metadata.imageDetails,
-            animationDetails: metadata.animationDetails,
-            attributes: metadata.attributes,
+            imageDetails: nil,
+            animationDetails: nil,
+            attributes: nil,
             localImagePath: nil,
             localVideoPath: nil,
             localCustomImagePath: nil,

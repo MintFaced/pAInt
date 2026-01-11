@@ -149,6 +149,65 @@ struct NFTMetadataRaw: Codable {
     }
 }
 
+// MARK: - OpenSea API Response Models
+
+struct OpenSeaNFTResponse: Codable {
+    let nfts: [OpenSeaNFT]
+    let next: String?
+}
+
+struct OpenSeaNFT: Codable {
+    let identifier: String
+    let collection: String?
+    let contract: String?
+    let token_standard: String?
+    let name: String?
+    let description: String?
+    let image_url: String?
+    let display_image_url: String?
+    let display_animation_url: String?
+    let metadata_url: String?
+    let opensea_url: String?
+    let updated_at: String?
+    let is_disabled: Bool?
+    let is_nsfw: Bool?
+    let animation_url: String?
+    let is_suspicious: Bool?
+    let creator: String?
+    let traits: [OpenSeaTrait]?
+    let owners: [OpenSeaOwner]?
+    let rarity: OpenSeaRarity?
+}
+
+struct OpenSeaTrait: Codable {
+    let trait_type: String?
+    let display_type: String?
+    let max_value: String?
+    let trait_count: Int?
+    let order: Int?
+    let value: String?
+}
+
+struct OpenSeaOwner: Codable {
+    let address: String?
+    let quantity: Int?
+}
+
+struct OpenSeaRarity: Codable {
+    let strategy_id: String?
+    let strategy_version: String?
+    let rank: Int?
+    let score: Double?
+    let calculated_at: String?
+    let max_rank: Int?
+    let total_supply: Int?
+    let ranking_features: OpenSeaRankingFeatures?
+}
+
+struct OpenSeaRankingFeatures: Codable {
+    let unique_attribute_count: Int?
+}
+
 // MARK: - Download Progress
 
 struct DownloadProgress {
