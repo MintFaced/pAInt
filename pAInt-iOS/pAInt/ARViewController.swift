@@ -330,7 +330,7 @@ class ARViewController: UIViewController {
     }
 
     private func importCollection(contractAddress: String) {
-        updateStatus("Importing collection...")
+        updateStatus("Importing: \(contractAddress.prefix(10))...")
         importButton.isEnabled = false
 
         Task {
@@ -338,11 +338,14 @@ class ARViewController: UIViewController {
 
             await MainActor.run {
                 if let error = collectionManager.error {
-                    updateStatus("Error: \(error)")
-                    showError(error)
+                    updateStatus("Failed")
+                    // Show detailed error
+                    let msg = "Contract: \(contractAddress)\n\n\(error)\n\nCheck: API key set? Internet connected?"
+                    showError(msg)
                     importButton.isEnabled = true
                 } else {
-                    updateStatus("Collection imported! Reloading AR...")
+                    let count = collectionManager.collections.last?.tokens.count ?? 0
+                    updateStatus("Success! \(count) NFTs")
                     // Restart AR session with new collections
                     startARSession()
                     importButton.isEnabled = true
