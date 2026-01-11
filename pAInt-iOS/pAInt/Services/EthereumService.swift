@@ -61,14 +61,46 @@ class EthereumService {
         repeat {
             let url = buildNFTsURL(contractAddress: contractAddress, pageKey: pageKey)
 
+            print("🌐 Making API request to:")
+            print("   URL: \(url.absoluteString)")
+
             let (data, response) = try await URLSession.shared.data(from: url)
 
-            guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200 else {
+            print("📡 Response received:")
+            if let httpResponse = response as? HTTPURLResponse {
+                print("   Status code: \(httpResponse.statusCode)")
+                print("   Headers: \(httpResponse.allHeaderFields)")
+            }
+            print("   Data size: \(data.count) bytes")
+
+            // Log raw response for debugging
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("   Raw response: \(responseString.prefix(500))...")
+            }
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("❌ Response is not HTTPURLResponse")
                 throw EthereumError.invalidResponse
             }
 
-            let alchemyResponse = try JSONDecoder().decode(AlchemyNFTResponse.self, from: data)
+            guard httpResponse.statusCode == 200 else {
+                print("❌ HTTP Status code: \(httpResponse.statusCode)")
+                if let errorString = String(data: data, encoding: .utf8) {
+                    print("❌ Error response: \(errorString)")
+                }
+                throw EthereumError.invalidResponse
+            }
+
+            let alchemyResponse: AlchemyNFTResponse
+            do {
+                alchemyResponse = try JSONDecoder().decode(AlchemyNFTResponse.self, from: data)
+            } catch {
+                print("❌ JSON Decode Error: \(error)")
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("❌ Failed to parse response: \(responseString)")
+                }
+                throw EthereumError.invalidResponse
+            }
 
             print("📦 Received \(alchemyResponse.nfts.count) NFTs from API")
 
