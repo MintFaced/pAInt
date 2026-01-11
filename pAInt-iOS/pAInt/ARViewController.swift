@@ -32,7 +32,7 @@ class ARViewController: UIViewController {
 
         // Initialize CollectionManager
         // TODO: Get API key from Settings/UserDefaults
-        let apiKey = "YOUR_ALCHEMY_API_KEY" // Replace with actual key
+        let apiKey = "7s3yWrDinM_gYVWgE7U-f"
         collectionManager = CollectionManager(alchemyAPIKey: apiKey, isPremium: false)
 
         setupUI()
@@ -330,8 +330,14 @@ class ARViewController: UIViewController {
     }
 
     private func importCollection(contractAddress: String) {
+        let apiKey = "7s3yWrDinM_gYVWgE7U-f"
+        let apiKeyPreview = "\(apiKey.prefix(5))...\(apiKey.suffix(3))"
+
         updateStatus("Importing: \(contractAddress.prefix(10))...")
         importButton.isEnabled = false
+
+        NSLog("🚀 Starting import for contract: %@", contractAddress)
+        NSLog("🔑 Using API key: %@", apiKeyPreview)
 
         Task {
             await collectionManager.importCollection(contractAddress: contractAddress)
@@ -339,13 +345,16 @@ class ARViewController: UIViewController {
             await MainActor.run {
                 if let error = collectionManager.error {
                     updateStatus("Failed")
+                    NSLog("❌ Import failed with error: %@", error.localizedDescription)
+
                     // Show detailed error
-                    let msg = "Contract: \(contractAddress)\n\n\(error)\n\nCheck: API key set? Internet connected?"
+                    let msg = "Contract: \(contractAddress)\n\nError: \(error.localizedDescription)\n\nAPI Key: \(apiKeyPreview)\n\nCheck console for full debug output"
                     showError(msg)
                     importButton.isEnabled = true
                 } else {
                     let count = collectionManager.collections.last?.tokens.count ?? 0
                     updateStatus("Success! \(count) NFTs")
+                    NSLog("✅ Import successful: %d NFTs", count)
                     // Restart AR session with new collections
                     startARSession()
                     importButton.isEnabled = true
