@@ -33,7 +33,7 @@ class ARViewController: UIViewController {
         // Initialize CollectionManager
         // TODO: Get API key from Settings/UserDefaults
         let apiKey = "7s3yWrDinM_gYVWgE7U-f"
-        collectionManager = CollectionManager(alchemyAPIKey: apiKey, isPremium: false)
+        collectionManager = CollectionManager(alchemyAPIKey: apiKey, isPremium: true)  // Set to true for testing
 
         setupUI()
         setupAR()
