@@ -161,7 +161,7 @@ class BundleLoader {
     }
 
     /// Download new artworks from remote server
-    func downloadUpdates(_ updateInfo: UpdateInfo, progressHandler: @escaping (Double) -> Void) async throws {
+    func downloadUpdates(_ updateInfo: UpdateInfo, progressHandler: @escaping (Double) async -> Void) async throws {
         NSLog("⬇️ Downloading \(updateInfo.newArtworksCount) new artworks")
 
         // Get base URL (remove manifest.json from path)
@@ -183,7 +183,7 @@ class BundleLoader {
             let (imageData, _) = try await URLSession.shared.data(from: imageURL)
             try imageData.write(to: imageDest)
             downloadedFiles += 1
-            progressHandler(Double(downloadedFiles) / Double(totalFiles))
+            await progressHandler(Double(downloadedFiles) / Double(totalFiles))
             NSLog("   ✅ Downloaded: \(artwork.image)")
 
             // Download video
@@ -193,7 +193,7 @@ class BundleLoader {
             let (videoData, _) = try await URLSession.shared.data(from: videoURL)
             try videoData.write(to: videoDest)
             downloadedFiles += 1
-            progressHandler(Double(downloadedFiles) / Double(totalFiles))
+            await progressHandler(Double(downloadedFiles) / Double(totalFiles))
             NSLog("   ✅ Downloaded: \(artwork.video)")
         }
 
