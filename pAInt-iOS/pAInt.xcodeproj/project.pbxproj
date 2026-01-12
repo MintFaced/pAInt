@@ -15,9 +15,9 @@
 		A100001C /* EthereumService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000018 /* EthereumService.swift */; };
 		A100001D /* AssetDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000019 /* AssetDownloader.swift */; };
 		A100001E /* CollectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100001A /* CollectionManager.swift */; };
-		A100001F /* EmailSignupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000022 /* EmailSignupViewController.swift */; };
-		A1000020 /* BundleLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000023 /* BundleLoader.swift */; };
-		A1000021 /* artificial_flowers.json in Resources */ = {isa = PBXBuildFile; fileRef = A1000024 /* artificial_flowers.json */; };
+		A100001F /* EmailSignupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000026 /* EmailSignupViewController.swift */; };
+		A1000020 /* BundleLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000027 /* BundleLoader.swift */; };
+		A1000029 /* artificial_flowers.json in Resources */ = {isa = PBXBuildFile; fileRef = A1000028 /* artificial_flowers.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,9 +31,9 @@
 		A1000018 /* EthereumService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/EthereumService.swift; sourceTree = "<group>"; };
 		A1000019 /* AssetDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/AssetDownloader.swift; sourceTree = "<group>"; };
 		A100001A /* CollectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/CollectionManager.swift; sourceTree = "<group>"; };
-		A1000022 /* EmailSignupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailSignupViewController.swift; sourceTree = "<group>"; };
-		A1000023 /* BundleLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/BundleLoader.swift; sourceTree = "<group>"; };
-		A1000024 /* artificial_flowers.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Resources/artificial_flowers.json; sourceTree = "<group>"; };
+		A1000026 /* EmailSignupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailSignupViewController.swift; sourceTree = "<group>"; };
+		A1000027 /* BundleLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/BundleLoader.swift; sourceTree = "<group>"; };
+		A1000028 /* artificial_flowers.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Resources/artificial_flowers.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,13 +69,13 @@
 				A1000011 /* AppDelegate.swift */,
 				A1000012 /* SceneDelegate.swift */,
 				A1000013 /* ARViewController.swift */,
-				A1000022 /* EmailSignupViewController.swift */,
+				A1000026 /* EmailSignupViewController.swift */,
 				A1000017 /* NFTMetadata.swift */,
 				A1000018 /* EthereumService.swift */,
-				A1000023 /* BundleLoader.swift */,
+				A1000027 /* BundleLoader.swift */,
 				A1000019 /* AssetDownloader.swift */,
 				A100001A /* CollectionManager.swift */,
-				A1000024 /* artificial_flowers.json */,
+				A1000028 /* artificial_flowers.json */,
 				A1000014 /* Assets.xcassets */,
 				A1000015 /* Info.plist */,
 			);
@@ -141,7 +141,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000004 /* Assets.xcassets in Resources */,
-				A1000021 /* artificial_flowers.json in Resources */,
+				A1000029 /* artificial_flowers.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
