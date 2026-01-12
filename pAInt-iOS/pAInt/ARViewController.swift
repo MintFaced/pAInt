@@ -17,9 +17,11 @@ class ARViewController: UIViewController {
     private var arView: ARSCNView!
     private var statusLabel: UILabel!
     private var soundButton: UIButton!
-    private var importButton: UIButton!
+    private var updatesButton: UIButton!  // Check for new artworks
+    private var emailButton: UIButton!     // Get email updates
 
-    private var collectionManager: CollectionManager!
+    private var bundleLoader: BundleLoader!
+    private var collection: NFTCollection?
     private var videoPlayers: [String: AVPlayer] = [:]
     private var videoNodes: [String: SKVideoNode] = [:]
     private var tokenLookup: [String: NFTToken] = [:] // Map trigger name -> token
@@ -30,10 +32,9 @@ class ARViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Initialize CollectionManager
-        // TODO: Get API key from Settings/UserDefaults
-        let apiKey = "7s3yWrDinM_gYVWgE7U-f"
-        collectionManager = CollectionManager(alchemyAPIKey: apiKey, isPremium: true)  // Set to true for testing
+        // Initialize BundleLoader and load Artificial Flowers collection
+        bundleLoader = BundleLoader()
+        collection = bundleLoader.loadCollection()
 
         setupUI()
         setupAR()
@@ -107,21 +108,37 @@ class ARViewController: UIViewController {
         soundButton.addTarget(self, action: #selector(toggleSound), for: .touchUpInside)
         view.addSubview(soundButton)
 
-        // Import Button
-        importButton = UIButton(type: .system)
-        importButton.translatesAutoresizingMaskIntoConstraints = false
-        importButton.setImage(UIImage(systemName: "plus.circle.fill"), for: .normal)
-        importButton.tintColor = .white
-        importButton.backgroundColor = UIColor(red: 0.33, green: 0.31, blue: 0.36, alpha: 0.85)
-        importButton.layer.cornerRadius = 28
-        importButton.layer.borderWidth = 1
-        importButton.layer.borderColor = UIColor(white: 1.0, alpha: 0.15).cgColor
-        importButton.layer.shadowColor = UIColor.black.cgColor
-        importButton.layer.shadowOffset = CGSize(width: 0, height: 2)
-        importButton.layer.shadowOpacity = 0.3
-        importButton.layer.shadowRadius = 4
-        importButton.addTarget(self, action: #selector(showImportDialog), for: .touchUpInside)
-        view.addSubview(importButton)
+        // Updates Button - Check for new artworks
+        updatesButton = UIButton(type: .system)
+        updatesButton.translatesAutoresizingMaskIntoConstraints = false
+        updatesButton.setImage(UIImage(systemName: "arrow.down.circle.fill"), for: .normal)
+        updatesButton.tintColor = .white
+        updatesButton.backgroundColor = UIColor(red: 0.33, green: 0.31, blue: 0.36, alpha: 0.85)
+        updatesButton.layer.cornerRadius = 28
+        updatesButton.layer.borderWidth = 1
+        updatesButton.layer.borderColor = UIColor(white: 1.0, alpha: 0.15).cgColor
+        updatesButton.layer.shadowColor = UIColor.black.cgColor
+        updatesButton.layer.shadowOffset = CGSize(width: 0, height: 2)
+        updatesButton.layer.shadowOpacity = 0.3
+        updatesButton.layer.shadowRadius = 4
+        updatesButton.addTarget(self, action: #selector(checkForUpdates), for: .touchUpInside)
+        view.addSubview(updatesButton)
+
+        // Email Button - Get updates via email
+        emailButton = UIButton(type: .system)
+        emailButton.translatesAutoresizingMaskIntoConstraints = false
+        emailButton.setImage(UIImage(systemName: "envelope.fill"), for: .normal)
+        emailButton.tintColor = .white
+        emailButton.backgroundColor = UIColor(red: 0.33, green: 0.31, blue: 0.36, alpha: 0.85)
+        emailButton.layer.cornerRadius = 28
+        emailButton.layer.borderWidth = 1
+        emailButton.layer.borderColor = UIColor(white: 1.0, alpha: 0.15).cgColor
+        emailButton.layer.shadowColor = UIColor.black.cgColor
+        emailButton.layer.shadowOffset = CGSize(width: 0, height: 2)
+        emailButton.layer.shadowOpacity = 0.3
+        emailButton.layer.shadowRadius = 4
+        emailButton.addTarget(self, action: #selector(showEmailSignup), for: .touchUpInside)
+        view.addSubview(emailButton)
 
         // Constraints
         NSLayoutConstraint.activate([
@@ -135,10 +152,15 @@ class ARViewController: UIViewController {
             soundButton.widthAnchor.constraint(equalToConstant: 56),
             soundButton.heightAnchor.constraint(equalToConstant: 56),
 
-            importButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
-            importButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            importButton.widthAnchor.constraint(equalToConstant: 56),
-            importButton.heightAnchor.constraint(equalToConstant: 56)
+            updatesButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+            updatesButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            updatesButton.widthAnchor.constraint(equalToConstant: 56),
+            updatesButton.heightAnchor.constraint(equalToConstant: 56),
+
+            emailButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+            emailButton.leadingAnchor.constraint(equalTo: updatesButton.trailingAnchor, constant: 12),
+            emailButton.widthAnchor.constraint(equalToConstant: 56),
+            emailButton.heightAnchor.constraint(equalToConstant: 56)
         ])
     }
 
@@ -170,37 +192,33 @@ class ARViewController: UIViewController {
     private func loadReferenceImages() -> Set<ARReferenceImage>? {
         var referenceImages = Set<ARReferenceImage>()
 
-        // Load from collections
-        for collection in collectionManager.collections {
-            for token in collection.tokens {
-                guard let imagePath = token.localImagePath else { continue }
+        // Load from Artificial Flowers collection
+        guard let collection = collection else {
+            NSLog("❌ No collection loaded")
+            return nil
+        }
 
-                // Load image
-                guard let image = UIImage(contentsOfFile: imagePath),
-                      let cgImage = image.cgImage else { continue }
+        for token in collection.tokens {
+            guard let imagePath = token.localImagePath else { continue }
 
-                // Determine physical width from image details or use default
-                let physicalWidth: CGFloat
-                if let details = token.imageDetails, let width = details.width, let height = details.height {
-                    // Use aspect ratio to estimate physical width (assume 30cm standard)
-                    let aspectRatio = CGFloat(width) / CGFloat(height)
-                    physicalWidth = aspectRatio > 1.0 ? 0.4 : 0.3 // Landscape: 40cm, Portrait: 30cm
-                } else {
-                    physicalWidth = 0.3 // Default: 30cm
-                }
+            // Load image
+            guard let image = UIImage(contentsOfFile: imagePath),
+                  let cgImage = image.cgImage else { continue }
 
-                // Create reference image
-                let referenceImage = ARReferenceImage(cgImage, orientation: .up, physicalWidth: physicalWidth)
-                let triggerName = "token_\(collection.contractAddress)_\(token.tokenId)"
-                referenceImage.name = triggerName
+            // Use default physical width of 30cm (A4-ish size)
+            let physicalWidth: CGFloat = 0.3
 
-                referenceImages.insert(referenceImage)
+            // Create reference image
+            let referenceImage = ARReferenceImage(cgImage, orientation: .up, physicalWidth: physicalWidth)
+            let triggerName = "af_\(token.tokenId)"
+            referenceImage.name = triggerName
 
-                // Store token for lookup
-                tokenLookup[triggerName] = token
+            referenceImages.insert(referenceImage)
 
-                print("Loaded trigger: \(token.name)")
-            }
+            // Store token for lookup
+            tokenLookup[triggerName] = token
+
+            NSLog("✅ Loaded trigger: \(token.name)")
         }
 
         // Fallback: Load test image from bundle if no collections
@@ -302,71 +320,97 @@ class ARViewController: UIViewController {
         soundButton.setImage(UIImage(systemName: iconName), for: .normal)
     }
 
-    @objc private func showImportDialog() {
-        let alert = UIAlertController(
-            title: "Import NFT Collection",
-            message: "Enter the Ethereum contract address of your NFT collection",
-            preferredStyle: .alert
-        )
+    // MARK: - Button Actions
 
-        alert.addTextField { textField in
-            textField.placeholder = "0x..."
-            textField.autocapitalizationType = .none
-            textField.autocorrectionType = .no
-            textField.keyboardType = .asciiCapable
-        }
-
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-
-        alert.addAction(UIAlertAction(title: "Import", style: .default) { [weak self] _ in
-            guard let self = self,
-                  let contractAddress = alert.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines),
-                  !contractAddress.isEmpty else { return }
-
-            self.importCollection(contractAddress: contractAddress)
-        })
-
-        present(alert, animated: true)
-    }
-
-    private func importCollection(contractAddress: String) {
-        let apiKey = "7s3yWrDinM_gYVWgE7U-f"
-        let apiKeyPreview = "\(apiKey.prefix(5))...\(apiKey.suffix(3))"
-
-        updateStatus("Importing: \(contractAddress.prefix(10))...")
-        importButton.isEnabled = false
-
-        NSLog("🚀 Starting import for contract: %@", contractAddress)
-        NSLog("🔑 Using API key: %@", apiKeyPreview)
+    @objc private func checkForUpdates() {
+        NSLog("🔍 Checking for artwork updates")
+        updateStatus("Checking for new artworks...")
+        updatesButton.isEnabled = false
 
         Task {
-            await collectionManager.importCollection(contractAddress: contractAddress)
+            do {
+                let updateInfo = try await bundleLoader.checkForUpdates()
 
-            await MainActor.run {
-                if let error = collectionManager.error {
-                    updateStatus("Failed")
-                    NSLog("❌ Import failed with error: %@", error)
+                await MainActor.run {
+                    if let updateInfo = updateInfo {
+                        // New artworks available!
+                        let alert = UIAlertController(
+                            title: "New Artworks Available!",
+                            message: "\(updateInfo.newArtworksCount) new pieces have been added to the Artificial Flowers collection. Would you like to download them now?",
+                            preferredStyle: .alert
+                        )
 
-                    // Show detailed error
-                    let msg = "Contract: \(contractAddress)\n\nError: \(error)\n\nAPI Key: \(apiKeyPreview)\n\nCheck console for full debug output"
-                    showError(msg)
-                    importButton.isEnabled = true
-                } else {
-                    let count = collectionManager.collections.last?.tokens.count ?? 0
-                    updateStatus("Success! \(count) NFTs")
-                    NSLog("✅ Import successful: %d NFTs", count)
-                    // Restart AR session with new collections
-                    startARSession()
-                    importButton.isEnabled = true
+                        alert.addAction(UIAlertAction(title: "Not Now", style: .cancel) { [weak self] _ in
+                            self?.updateStatus("Scanning for artwork...")
+                            self?.updatesButton.isEnabled = true
+                        })
+
+                        alert.addAction(UIAlertAction(title: "Download", style: .default) { [weak self] _ in
+                            self?.downloadUpdates(updateInfo)
+                        })
+
+                        present(alert, animated: true)
+                    } else {
+                        // Already up to date
+                        updateStatus("Collection up to date ✓")
+                        updatesButton.isEnabled = true
+
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                            self?.updateStatus("Scanning for artwork...")
+                        }
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    NSLog("❌ Update check failed: %@", error.localizedDescription)
+                    updateStatus("Update check failed")
+                    updatesButton.isEnabled = true
+
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                        self?.updateStatus("Scanning for artwork...")
+                    }
                 }
             }
         }
     }
 
-    private func showError(_ message: String) {
-        let alert = UIAlertController(title: "Import Failed", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
+    private func downloadUpdates(_ updateInfo: UpdateInfo) {
+        updateStatus("Downloading new artworks...")
+
+        Task {
+            do {
+                try await bundleLoader.downloadUpdates(updateInfo) { progress in
+                    await MainActor.run {
+                        self.updateStatus("Downloading \(Int(progress * 100))%...")
+                    }
+                }
+
+                await MainActor.run {
+                    updateStatus("Download complete! Reloading...")
+                    // Reload collection and restart AR
+                    collection = bundleLoader.loadCollection()
+                    startARSession()
+                    updatesButton.isEnabled = true
+
+                    NSLog("✅ Updates downloaded and loaded")
+                }
+            } catch {
+                await MainActor.run {
+                    NSLog("❌ Download failed: %@", error.localizedDescription)
+                    updateStatus("Download failed")
+                    updatesButton.isEnabled = true
+                }
+            }
+        }
+    }
+
+    @objc private func showEmailSignup() {
+        NSLog("📧 Opening email signup")
+
+        // Create a styled view controller for Google Forms
+        let emailVC = EmailSignupViewController()
+        emailVC.modalPresentationStyle = .formSheet
+        present(emailVC, animated: true)
     }
 
     private func updateStatus(_ text: String) {
