@@ -295,8 +295,10 @@ class ARViewController: UIViewController {
             NSLog("➕ Added plane node for: \(imageName)")
         }
 
-        // Play video with loop
+        // Start video from beginning
+        player.seek(to: .zero)
         player.play()
+        NSLog("▶️ Playing video for: \(imageName)")
 
         // Loop video
         NotificationCenter.default.addObserver(
