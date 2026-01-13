@@ -519,8 +519,10 @@ extension ARViewController: ARSCNViewDelegate {
         // Handle tracking updates
         guard let imageAnchor = anchor as? ARImageAnchor else { return }
 
+        let imageName = imageAnchor.referenceImage.name ?? "unknown"
+
         if !imageAnchor.isTracked {
-            let imageName = imageAnchor.referenceImage.name ?? "unknown"
+            // Tracking lost
             print("Tracking lost for: \(imageName)")
 
             // Stop video and remove player when tracking is lost
@@ -542,6 +544,29 @@ extension ARViewController: ARSCNViewDelegate {
 
             // Reset status message
             updateStatus("Scanning for artwork...")
+        } else if imageAnchor.isTracked && videoPlayers[imageName] == nil {
+            // Tracking regained - restart video
+            print("Tracking regained for: \(imageName)")
+
+            let imageSize = imageAnchor.referenceImage.physicalSize
+
+            // Get artwork name if available
+            let artworkName = tokenLookup[imageName]?.name ?? imageName
+            updateStatus("\(artworkName)")
+
+            // Hide buttons again
+            DispatchQueue.main.async { [weak self] in
+                UIView.animate(withDuration: 0.3) {
+                    self?.soundButton.alpha = 0
+                    self?.updatesButton.alpha = 0
+                    self?.emailButton.alpha = 0
+                }
+            }
+
+            // Restart video
+            DispatchQueue.main.async { [weak self] in
+                self?.playVideo(for: imageName, on: anchor, imageSize: imageSize)
+            }
         }
     }
 
