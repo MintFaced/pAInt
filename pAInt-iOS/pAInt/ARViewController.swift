@@ -32,6 +32,15 @@ class ARViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // Configure audio session for playback
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+            NSLog("✅ Audio session configured for playback")
+        } catch {
+            NSLog("❌ Failed to configure audio session: \(error.localizedDescription)")
+        }
+
         // Initialize BundleLoader and load Artificial Flowers collection
         bundleLoader = BundleLoader()
         collection = bundleLoader.loadCollection()
