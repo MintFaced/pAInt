@@ -70,10 +70,15 @@ class BundleLoader {
         var tokens: [NFTToken] = []
 
         for artwork in manifest.artworks {
-            // Get paths to bundled files
-            guard let imagePath = Bundle.main.path(forResource: artwork.image.replacingOccurrences(of: ".jpg", with: ""), ofType: "jpg"),
-                  let videoPath = Bundle.main.path(forResource: artwork.video.replacingOccurrences(of: ".mp4", with: ""), ofType: "mp4") else {
-                NSLog("⚠️ Missing files for artwork #\(artwork.id) - skipping")
+            // Get paths to bundled files - extract filename and extension
+            let imageFileName = (artwork.image as NSString).deletingPathExtension
+            let imageExtension = (artwork.image as NSString).pathExtension
+            let videoFileName = (artwork.video as NSString).deletingPathExtension
+            let videoExtension = (artwork.video as NSString).pathExtension
+
+            guard let imagePath = Bundle.main.path(forResource: imageFileName, ofType: imageExtension),
+                  let videoPath = Bundle.main.path(forResource: videoFileName, ofType: videoExtension) else {
+                NSLog("⚠️ Missing files for artwork #\(artwork.id) (\(artwork.image)) - skipping")
                 continue
             }
 
