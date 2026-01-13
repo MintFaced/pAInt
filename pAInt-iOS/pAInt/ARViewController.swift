@@ -494,15 +494,17 @@ extension ARViewController: ARSCNViewDelegate {
         // Get artwork name if available
         let artworkName = tokenLookup[imageName]?.name ?? imageName
 
-        print("Detected image: \(imageName)")
+        NSLog("🎯 Detected image: \(imageName)")
         updateStatus("\(artworkName)")
 
         // Hide buttons for clean viewing experience
+        NSLog("🙈 Hiding buttons")
         DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
             UIView.animate(withDuration: 0.3) {
-                self?.soundButton.alpha = 0
-                self?.updatesButton.alpha = 0
-                self?.emailButton.alpha = 0
+                self.soundButton.alpha = 0
+                self.updatesButton.alpha = 0
+                self.emailButton.alpha = 0
             }
         }
 
@@ -520,10 +522,11 @@ extension ARViewController: ARSCNViewDelegate {
         guard let imageAnchor = anchor as? ARImageAnchor else { return }
 
         let imageName = imageAnchor.referenceImage.name ?? "unknown"
+        let hasPlayer = videoPlayers[imageName] != nil
 
-        if !imageAnchor.isTracked {
-            // Tracking lost
-            print("Tracking lost for: \(imageName)")
+        if !imageAnchor.isTracked && hasPlayer {
+            // Tracking lost - stop video
+            NSLog("📵 Tracking lost for: \(imageName)")
 
             // Stop video and remove player when tracking is lost
             if let player = videoPlayers[imageName] {
@@ -534,19 +537,21 @@ extension ARViewController: ARSCNViewDelegate {
             }
 
             // Show buttons again
+            NSLog("👀 Showing buttons")
             DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
                 UIView.animate(withDuration: 0.3) {
-                    self?.soundButton.alpha = 1
-                    self?.updatesButton.alpha = 1
-                    self?.emailButton.alpha = 1
+                    self.soundButton.alpha = 1
+                    self.updatesButton.alpha = 1
+                    self.emailButton.alpha = 1
                 }
             }
 
             // Reset status message
             updateStatus("Scanning for artwork...")
-        } else if imageAnchor.isTracked && videoPlayers[imageName] == nil {
+        } else if imageAnchor.isTracked && !hasPlayer {
             // Tracking regained - restart video
-            print("Tracking regained for: \(imageName)")
+            NSLog("🔄 Tracking regained for: \(imageName)")
 
             let imageSize = imageAnchor.referenceImage.physicalSize
 
@@ -555,11 +560,13 @@ extension ARViewController: ARSCNViewDelegate {
             updateStatus("\(artworkName)")
 
             // Hide buttons again
+            NSLog("🙈 Hiding buttons (regained)")
             DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
                 UIView.animate(withDuration: 0.3) {
-                    self?.soundButton.alpha = 0
-                    self?.updatesButton.alpha = 0
-                    self?.emailButton.alpha = 0
+                    self.soundButton.alpha = 0
+                    self.updatesButton.alpha = 0
+                    self.emailButton.alpha = 0
                 }
             }
 
