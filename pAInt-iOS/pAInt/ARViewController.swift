@@ -80,13 +80,6 @@ class ARViewController: UIViewController {
         statusLabel.layer.borderColor = UIColor(white: 1.0, alpha: 0.15).cgColor
         statusLabel.clipsToBounds = true
 
-        // Add subtle shadow
-        statusLabel.layer.shadowColor = UIColor.black.cgColor
-        statusLabel.layer.shadowOffset = CGSize(width: 0, height: 2)
-        statusLabel.layer.shadowOpacity = 0.3
-        statusLabel.layer.shadowRadius = 4
-        statusLabel.layer.masksToBounds = false
-
         view.addSubview(statusLabel)
 
         // Sound Toggle Button - Enhanced styling
