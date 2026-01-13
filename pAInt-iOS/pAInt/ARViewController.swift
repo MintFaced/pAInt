@@ -297,7 +297,7 @@ class ARViewController: UIViewController {
 
         // Show artwork name if available
         let artworkName = tokenLookup[imageName]?.name ?? imageName
-        updateStatus("Showing: \(artworkName)")
+        updateStatus("\(artworkName)")
     }
 
     // MARK: - Actions
@@ -486,7 +486,7 @@ extension ARViewController: ARSCNViewDelegate {
         let artworkName = tokenLookup[imageName]?.name ?? imageName
 
         print("Detected image: \(imageName)")
-        updateStatus("Found: \(artworkName)")
+        updateStatus("\(artworkName)")
 
         // Add elegant frame border around the detected image
         addFrameBorder(to: node, imageSize: imageSize)
