@@ -4,164 +4,178 @@
     "artist": "Ryan Anderson",
     "description": "A generative art collection exploring the intersection of nature and technology",
     "website": "https://opensea.io/collection/artificialflowers",
-    "total_artworks": 22,
+    "total_artworks": 24,
     "version": 1,
     "last_updated": "2026-01-12"
   },
   "artworks": [
     {
       "id": "1",
-      "name": "Artificial Flower #1",
+      "name": "Banana Zone",
       "image": "af_001.jpg",
       "video": "af_001.mp4",
       "description": "First piece in the Artificial Flowers collection"
     },
     {
       "id": "2",
-      "name": "Artificial Flower #2",
+      "name": "Daffodils",
       "image": "af_002.jpg",
       "video": "af_002.mp4",
       "description": "Second piece in the Artificial Flowers collection"
     },
     {
       "id": "3",
-      "name": "Artificial Flower #3",
+      "name": "Firmware for Nectra",
       "image": "af_003.jpg",
       "video": "af_003.mp4",
       "description": "Third piece in the Artificial Flowers collection"
     },
     {
       "id": "4",
-      "name": "Artificial Flower #4",
+      "name": "Flaxfeeding Season",
       "image": "af_004.jpg",
       "video": "af_004.mp4",
       "description": "Fourth piece in the Artificial Flowers collection"
     },
     {
       "id": "5",
-      "name": "Artificial Flower #5",
+      "name": "Fallen Petals",
       "image": "af_005.jpg",
       "video": "af_005.mp4",
       "description": "Fifth piece in the Artificial Flowers collection"
     },
     {
       "id": "6",
-      "name": "Artificial Flower #6",
+      "name": "Monet Fireworks",
       "image": "af_006.jpg",
       "video": "af_006.mp4",
       "description": "Sixth piece in the Artificial Flowers collection"
     },
     {
       "id": "7",
-      "name": "Artificial Flower #7",
+      "name": "New SZN",
       "image": "af_007.jpg",
       "video": "af_007.mp4",
       "description": "Seventh piece in the Artificial Flowers collection"
     },
     {
       "id": "8",
-      "name": "Artificial Flower #8",
+      "name": "Night Creeper",
       "image": "af_008.jpg",
       "video": "af_008.mp4",
       "description": "Eighth piece in the Artificial Flowers collection"
     },
     {
       "id": "9",
-      "name": "Artificial Flower #9",
+      "name": "Re: Growth",
       "image": "af_009.jpg",
       "video": "af_009.mp4",
       "description": "Ninth piece in the Artificial Flowers collection"
     },
     {
       "id": "10",
-      "name": "Artificial Flower #10",
+      "name": "Solar Reaching",
       "image": "af_010.jpg",
       "video": "af_010.mp4",
       "description": "Tenth piece in the Artificial Flowers collection"
     },
     {
       "id": "11",
-      "name": "Artificial Flower #11",
+      "name": "Just Bloom",
       "image": "af_011.jpg",
       "video": "af_011.mp4",
       "description": "Eleventh piece in the Artificial Flowers collection"
     },
     {
       "id": "12",
-      "name": "Artificial Flower #12",
+      "name": "Pond Bloom",
       "image": "af_012.jpg",
       "video": "af_012.mp4",
       "description": "Twelfth piece in the Artificial Flowers collection"
     },
     {
       "id": "13",
-      "name": "Artificial Flower #13",
+      "name": "One Lily",
       "image": "af_013.jpg",
       "video": "af_013.mp4",
       "description": "Thirteenth piece in the Artificial Flowers collection"
     },
     {
       "id": "14",
-      "name": "Artificial Flower #14",
+      "name": "Autumn Shift",
       "image": "af_014.jpg",
       "video": "af_014.mp4",
       "description": "Fourteenth piece in the Artificial Flowers collection"
     },
     {
       "id": "15",
-      "name": "Artificial Flower #15",
+      "name": "Water Feature",
       "image": "af_015.jpg",
       "video": "af_015.mp4",
       "description": "Fifteenth piece in the Artificial Flowers collection"
     },
     {
       "id": "16",
-      "name": "Artificial Flower #16",
+      "name": "Pollen Hazard",
       "image": "af_016.jpg",
       "video": "af_016.mp4",
       "description": "Sixteenth piece in the Artificial Flowers collection"
     },
     {
       "id": "17",
-      "name": "Artificial Flower #17",
+      "name": "Night Bloom",
       "image": "af_017.jpg",
       "video": "af_017.mp4",
       "description": "Seventeenth piece in the Artificial Flowers collection"
     },
     {
       "id": "18",
-      "name": "Artificial Flower #18",
+      "name": "Poison Neon",
       "image": "af_018.jpg",
       "video": "af_018.mp4",
       "description": "Eighteenth piece in the Artificial Flowers collection"
     },
     {
       "id": "19",
-      "name": "Artificial Flower #19",
+      "name": "Lifespan",
       "image": "af_019.jpg",
       "video": "af_019.mp4",
       "description": "Nineteenth piece in the Artificial Flowers collection"
     },
     {
       "id": "20",
-      "name": "Artificial Flower #20",
+      "name": "Coral",
       "image": "af_020.jpg",
       "video": "af_020.mp4",
       "description": "Twentieth piece in the Artificial Flowers collection"
     },
     {
       "id": "21",
-      "name": "Artificial Flower #21",
+      "name": "Forest Fauna",
       "image": "af_021.jpg",
       "video": "af_021.mp4",
       "description": "Twenty-first piece in the Artificial Flowers collection"
     },
     {
       "id": "22",
-      "name": "Artificial Flower #22",
+      "name": "Model Son",
       "image": "af_022.jpg",
       "video": "af_022.mp4",
       "description": "Twenty-second piece in the Artificial Flowers collection"
+    },
+    {
+      "id": "23",
+      "name": "Noise Flowers",
+      "image": "af_023.jpg",
+      "video": "af_023.mp4",
+      "description": "Twenty-third piece in the Artificial Flowers collection"
+    },
+    {
+      "id": "24",
+      "name": "Stems",
+      "image": "af_024.jpg",
+      "video": "af_024.mp4",
+      "description": "Twenty-fourth piece in the Artificial Flowers collection"
     }
   ]
 }

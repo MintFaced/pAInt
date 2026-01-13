@@ -302,7 +302,9 @@ class ARViewController: UIViewController {
             player.play()
         }
 
-        updateStatus("Playing: \(imageName)")
+        // Show artwork name if available
+        let artworkName = tokenLookup[imageName]?.name ?? imageName
+        updateStatus("Playing: \(artworkName)")
     }
 
     // MARK: - Actions
@@ -487,8 +489,11 @@ extension ARViewController: ARSCNViewDelegate {
         let imageName = referenceImage.name ?? "unknown"
         let imageSize = referenceImage.physicalSize
 
+        // Get artwork name if available
+        let artworkName = tokenLookup[imageName]?.name ?? imageName
+
         print("Detected image: \(imageName)")
-        updateStatus("Found: \(imageName)")
+        updateStatus("Found: \(artworkName)")
 
         // Add elegant frame border around the detected image
         addFrameBorder(to: node, imageSize: imageSize)
