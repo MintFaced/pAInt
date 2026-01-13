@@ -497,6 +497,15 @@ extension ARViewController: ARSCNViewDelegate {
         print("Detected image: \(imageName)")
         updateStatus("\(artworkName)")
 
+        // Hide buttons for clean viewing experience
+        DispatchQueue.main.async { [weak self] in
+            UIView.animate(withDuration: 0.3) {
+                self?.soundButton.alpha = 0
+                self?.updatesButton.alpha = 0
+                self?.emailButton.alpha = 0
+            }
+        }
+
         // Add elegant frame border around the detected image
         addFrameBorder(to: node, imageSize: imageSize)
 
@@ -522,6 +531,15 @@ extension ARViewController: ARSCNViewDelegate {
                 NSLog("🛑 Stopped video for: \(imageName)")
             }
 
+            // Show buttons again
+            DispatchQueue.main.async { [weak self] in
+                UIView.animate(withDuration: 0.3) {
+                    self?.soundButton.alpha = 1
+                    self?.updatesButton.alpha = 1
+                    self?.emailButton.alpha = 1
+                }
+            }
+
             // Reset status message
             updateStatus("Scanning for artwork...")
         }
@@ -540,6 +558,15 @@ extension ARViewController: ARSCNViewDelegate {
             videoPlayers.removeValue(forKey: imageName)
             videoNodes.removeValue(forKey: imageName)
             NSLog("🛑 Removed video for: \(imageName)")
+        }
+
+        // Show buttons again
+        DispatchQueue.main.async { [weak self] in
+            UIView.animate(withDuration: 0.3) {
+                self?.soundButton.alpha = 1
+                self?.updatesButton.alpha = 1
+                self?.emailButton.alpha = 1
+            }
         }
 
         // Reset status message
