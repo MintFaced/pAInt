@@ -24,6 +24,7 @@ class ARViewController: UIViewController {
     private var collection: NFTCollection?
     private var videoPlayers: [String: AVPlayer] = [:]
     private var videoNodes: [String: SKVideoNode] = [:]
+    private var planeNodes: [String: SCNNode] = [:] // Track plane nodes for cleanup
     private var tokenLookup: [String: NFTToken] = [:] // Map trigger name -> token
     private var isMuted: Bool = false
 
@@ -289,6 +290,9 @@ class ARViewController: UIViewController {
         // Add to anchor
         if let anchorNode = arView.node(for: anchor) {
             anchorNode.addChildNode(planeNode)
+            // Store plane node for cleanup
+            planeNodes[imageName] = planeNode
+            NSLog("➕ Added plane node for: \(imageName)")
         }
 
         // Play video with loop
@@ -536,6 +540,13 @@ extension ARViewController: ARSCNViewDelegate {
                 NSLog("🛑 Stopped video for: \(imageName)")
             }
 
+            // Remove plane node from scene
+            if let planeNode = planeNodes[imageName] {
+                planeNode.removeFromParentNode()
+                planeNodes.removeValue(forKey: imageName)
+                NSLog("🗑️ Removed plane node for: \(imageName)")
+            }
+
             // Show buttons again
             NSLog("👀 Showing buttons")
             DispatchQueue.main.async { [weak self] in
@@ -592,12 +603,20 @@ extension ARViewController: ARSCNViewDelegate {
             NSLog("🛑 Removed video for: \(imageName)")
         }
 
+        // Remove plane node from scene
+        if let planeNode = planeNodes[imageName] {
+            planeNode.removeFromParentNode()
+            planeNodes.removeValue(forKey: imageName)
+            NSLog("🗑️ Removed plane node for: \(imageName)")
+        }
+
         // Show buttons again
         DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
             UIView.animate(withDuration: 0.3) {
-                self?.soundButton.alpha = 1
-                self?.updatesButton.alpha = 1
-                self?.emailButton.alpha = 1
+                self.soundButton.alpha = 1
+                self.updatesButton.alpha = 1
+                self.emailButton.alpha = 1
             }
         }
 
