@@ -243,19 +243,23 @@ class ARViewController: UIViewController {
     // MARK: - Video Playback
 
     private func playVideo(for imageName: String, on anchor: ARAnchor, imageSize: CGSize) {
+        NSLog("🎬 playVideo called for: \(imageName)")
+
         // Get video path from token
         var videoURL: URL?
 
         if let token = tokenLookup[imageName], let videoPath = token.localVideoPath {
             // Use NFT collection video
             videoURL = URL(fileURLWithPath: videoPath)
+            NSLog("   📹 Video path: \(videoPath)")
         } else if let testVideoPath = Bundle.main.path(forResource: "test_video", ofType: "mp4") {
             // Fallback to test video
             videoURL = URL(fileURLWithPath: testVideoPath)
+            NSLog("   📹 Using test video")
         }
 
         guard let videoURL = videoURL else {
-            print("Video file not found for \(imageName)")
+            NSLog("   ❌ Video file not found for \(imageName)")
             return
         }
 
@@ -293,6 +297,8 @@ class ARViewController: UIViewController {
             // Store plane node for cleanup
             planeNodes[imageName] = planeNode
             NSLog("➕ Added plane node for: \(imageName)")
+        } else {
+            NSLog("❌ Could not find anchor node for: \(imageName)")
         }
 
         // Start video from beginning
@@ -529,6 +535,9 @@ extension ARViewController: ARSCNViewDelegate {
 
         let imageName = imageAnchor.referenceImage.name ?? "unknown"
         let hasPlayer = videoPlayers[imageName] != nil
+        let isTracked = imageAnchor.isTracked
+
+        NSLog("🔍 didUpdate: \(imageName) tracked=\(isTracked) hasPlayer=\(hasPlayer)")
 
         if !imageAnchor.isTracked && hasPlayer {
             // Tracking lost - stop video
