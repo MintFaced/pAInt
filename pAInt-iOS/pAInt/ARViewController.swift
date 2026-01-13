@@ -304,7 +304,7 @@ class ARViewController: UIViewController {
 
         // Show artwork name if available
         let artworkName = tokenLookup[imageName]?.name ?? imageName
-        updateStatus("Playing: \(artworkName)")
+        updateStatus("Showing: \(artworkName)")
     }
 
     // MARK: - Actions
