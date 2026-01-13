@@ -511,8 +511,38 @@ extension ARViewController: ARSCNViewDelegate {
         guard let imageAnchor = anchor as? ARImageAnchor else { return }
 
         if !imageAnchor.isTracked {
-            print("Tracking lost for: \(imageAnchor.referenceImage.name ?? "unknown")")
-            // Video continues playing for 3-5 seconds (implement fade out logic if needed)
+            let imageName = imageAnchor.referenceImage.name ?? "unknown"
+            print("Tracking lost for: \(imageName)")
+
+            // Stop video and remove player when tracking is lost
+            if let player = videoPlayers[imageName] {
+                player.pause()
+                videoPlayers.removeValue(forKey: imageName)
+                videoNodes.removeValue(forKey: imageName)
+                NSLog("🛑 Stopped video for: \(imageName)")
+            }
+
+            // Reset status message
+            updateStatus("Scanning for artwork...")
         }
+    }
+
+    func renderer(_ renderer: SCNSceneRenderer, didRemove node: SCNNode, for anchor: ARAnchor) {
+        // Handle anchor removal
+        guard let imageAnchor = anchor as? ARImageAnchor else { return }
+
+        let imageName = imageAnchor.referenceImage.name ?? "unknown"
+        print("Anchor removed for: \(imageName)")
+
+        // Stop video and clean up
+        if let player = videoPlayers[imageName] {
+            player.pause()
+            videoPlayers.removeValue(forKey: imageName)
+            videoNodes.removeValue(forKey: imageName)
+            NSLog("🛑 Removed video for: \(imageName)")
+        }
+
+        // Reset status message
+        updateStatus("Scanning for artwork...")
     }
 }
