@@ -25,7 +25,7 @@ class ARViewController: UIViewController {
     private var videoPlayers: [String: AVPlayer] = [:]
     private var videoNodes: [String: SKVideoNode] = [:]
     private var tokenLookup: [String: NFTToken] = [:] // Map trigger name -> token
-    private var isMuted: Bool = true
+    private var isMuted: Bool = false
 
     // MARK: - Lifecycle
 
@@ -85,7 +85,7 @@ class ARViewController: UIViewController {
         // Sound Toggle Button - Enhanced styling
         soundButton = UIButton(type: .system)
         soundButton.translatesAutoresizingMaskIntoConstraints = false
-        soundButton.setImage(UIImage(systemName: "speaker.slash.fill"), for: .normal)
+        soundButton.setImage(UIImage(systemName: "speaker.wave.2.fill"), for: .normal)
         soundButton.tintColor = .white
         soundButton.backgroundColor = UIColor(red: 0.33, green: 0.31, blue: 0.36, alpha: 0.85) // #536878
         soundButton.layer.cornerRadius = 28
