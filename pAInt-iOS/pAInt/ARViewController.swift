@@ -60,13 +60,17 @@ class ARViewController: UIViewController {
         arView.session.pause()
     }
 
+    override var prefersStatusBarHidden: Bool {
+        return true
+    }
+
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Ensure AR view fills entire screen
+        // Ensure AR view fills entire screen including under status bar
         arView.frame = view.bounds
     }
 
