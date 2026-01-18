@@ -64,14 +64,19 @@ class ARViewController: UIViewController {
         return .lightContent
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        // Ensure AR view fills entire screen
+        arView.frame = view.bounds
+    }
+
     // MARK: - Setup
 
     private func setupUI() {
         view.backgroundColor = UIColor(red: 0.059, green: 0.059, blue: 0.059, alpha: 1.0) // #0F0F0F
 
-        // AR View - Fill entire screen
-        arView = ARSCNView(frame: .zero)
-        arView.translatesAutoresizingMaskIntoConstraints = false
+        // AR View - Fill entire screen (frame set in viewDidLayoutSubviews)
+        arView = ARSCNView(frame: view.bounds)
         arView.delegate = self
         arView.automaticallyUpdatesLighting = true
         view.addSubview(arView)
@@ -146,12 +151,6 @@ class ARViewController: UIViewController {
 
         // Constraints
         NSLayoutConstraint.activate([
-            // AR View - Fill entire screen
-            arView.topAnchor.constraint(equalTo: view.topAnchor),
-            arView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            arView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            arView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-
             statusLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             statusLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             statusLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 220),
