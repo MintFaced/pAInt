@@ -33,6 +33,10 @@ class ARViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // Force full-screen layout
+        edgesForExtendedLayout = [.top, .bottom, .left, .right]
+        extendedLayoutIncludesOpaqueBars = true
+
         // Configure audio session for playback
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
@@ -81,9 +85,10 @@ class ARViewController: UIViewController {
 
         // AR View - Fill entire screen (frame set in viewDidLayoutSubviews)
         arView = ARSCNView(frame: view.bounds)
+        arView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         arView.delegate = self
         arView.automaticallyUpdatesLighting = true
-        view.addSubview(arView)
+        view.insertSubview(arView, at: 0) // Insert at bottom so buttons are on top
 
         // Status Label - Enhanced styling
         statusLabel = UILabel()

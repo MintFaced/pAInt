@@ -16,7 +16,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = ARViewController()
+        window.frame = windowScene.coordinateSpace.bounds
+
+        let viewController = ARViewController()
+        viewController.modalPresentationStyle = .fullScreen
+
+        window.rootViewController = viewController
         window.makeKeyAndVisible()
         self.window = window
     }
