@@ -52,25 +52,11 @@ class ARViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-
-        // Force view to fill window
-        if let window = view.window {
-            view.frame = window.bounds
-        }
-
         startARSession()
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-
-        // Force full screen after view appears
-        if let window = view.window {
-            view.frame = window.bounds
-        }
-        arView.frame = view.bounds
-
-        // Request status bar to update
         setNeedsStatusBarAppearanceUpdate()
     }
 
