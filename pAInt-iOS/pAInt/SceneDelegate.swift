@@ -15,8 +15,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
 
+        // Create full-screen window
         let window = UIWindow(windowScene: windowScene)
-        window.frame = windowScene.coordinateSpace.bounds
+        window.frame = UIScreen.main.bounds
+
+        NSLog("🪟 Window frame: \(window.frame)")
+        NSLog("📱 Screen bounds: \(UIScreen.main.bounds)")
 
         let viewController = ARViewController()
         viewController.modalPresentationStyle = .fullScreen

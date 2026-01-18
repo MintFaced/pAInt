@@ -33,10 +33,6 @@ class ARViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Force full-screen layout
-        edgesForExtendedLayout = [.top, .bottom, .left, .right]
-        extendedLayoutIncludesOpaqueBars = true
-
         // Configure audio session for playback
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
@@ -72,10 +68,19 @@ class ARViewController: UIViewController {
         return .lightContent
     }
 
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        // Force view to fill entire window
+        if let window = view.window {
+            view.frame = window.bounds
+        }
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Ensure AR view fills entire screen including under status bar
+        // Ensure AR view fills entire view
         arView.frame = view.bounds
+        NSLog("📐 View bounds: \(view.bounds), AR view frame: \(arView.frame)")
     }
 
     // MARK: - Setup
