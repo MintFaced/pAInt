@@ -68,32 +68,25 @@ class ARViewController: UIViewController {
         return .lightContent
     }
 
-    override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        // Force view to fill entire window
-        if let window = view.window {
-            view.frame = window.bounds
-        }
+    override var prefersHomeIndicatorAutoHidden: Bool {
+        return false
     }
 
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        // Ensure AR view fills entire view
-        arView.frame = view.bounds
-        NSLog("📐 View bounds: \(view.bounds), AR view frame: \(arView.frame)")
+    override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
+        return []
     }
 
     // MARK: - Setup
 
     private func setupUI() {
-        view.backgroundColor = UIColor(red: 0.059, green: 0.059, blue: 0.059, alpha: 1.0) // #0F0F0F
+        view.backgroundColor = .black
 
-        // AR View - Fill entire screen (frame set in viewDidLayoutSubviews)
-        arView = ARSCNView(frame: view.bounds)
-        arView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        // AR View - Fill entire screen using Auto Layout
+        arView = ARSCNView()
+        arView.translatesAutoresizingMaskIntoConstraints = false
         arView.delegate = self
         arView.automaticallyUpdatesLighting = true
-        view.insertSubview(arView, at: 0) // Insert at bottom so buttons are on top
+        view.addSubview(arView)
 
         // Status Label - Enhanced styling
         statusLabel = UILabel()
@@ -165,11 +158,19 @@ class ARViewController: UIViewController {
 
         // Constraints
         NSLayoutConstraint.activate([
+            // AR View - Pin to ALL edges (not safe area) to fill entire screen
+            arView.topAnchor.constraint(equalTo: view.topAnchor),
+            arView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            arView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            arView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            // Status Label - Use safe area
             statusLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             statusLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             statusLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 220),
             statusLabel.heightAnchor.constraint(equalToConstant: 44),
 
+            // Buttons - Use safe area for bottom positioning
             soundButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
             soundButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
             soundButton.widthAnchor.constraint(equalToConstant: 56),
