@@ -295,7 +295,11 @@ class ARViewController: UIViewController {
 
         // Create video player
         let player = AVPlayer(url: videoURL)
-        player.isMuted = isMuted
+        // Mute if user has muted OR if multiple artworks are playing (to avoid audio clash)
+        player.isMuted = isMuted || activeArtworkCount > 1
+        if activeArtworkCount > 1 {
+            NSLog("🔇 Muting video - multiple artworks playing")
+        }
         videoPlayers[imageName] = player
 
         // Create video node
@@ -541,9 +545,9 @@ extension ARViewController: ARSCNViewDelegate {
         // Increment active artwork count
         activeArtworkCount += 1
 
-        // Update status to show multiple artworks if more than one
+        // Update status to show collection name when multiple artworks playing
         if activeArtworkCount > 1 {
-            updateStatus("Viewing \(activeArtworkCount) artworks")
+            updateStatus("Artificial Flowers")
         } else {
             updateStatus("\(artworkName)")
         }
@@ -617,8 +621,8 @@ extension ARViewController: ARSCNViewDelegate {
                 // Reset status message
                 updateStatus("Scanning for artwork...")
             } else {
-                // Update count if multiple still active
-                updateStatus("Viewing \(activeArtworkCount) artwork\(activeArtworkCount > 1 ? "s" : "")")
+                // Show collection name if multiple still active
+                updateStatus("Artificial Flowers")
             }
         } else if imageAnchor.isTracked && !hasPlayer {
             // Tracking regained - restart video
@@ -632,9 +636,9 @@ extension ARViewController: ARSCNViewDelegate {
             // Get artwork name if available
             let artworkName = tokenLookup[imageName]?.name ?? imageName
 
-            // Update status to show multiple artworks if more than one
+            // Update status to show collection name when multiple artworks playing
             if activeArtworkCount > 1 {
-                updateStatus("Viewing \(activeArtworkCount) artworks")
+                updateStatus("Artificial Flowers")
             } else {
                 updateStatus("\(artworkName)")
             }
@@ -698,8 +702,8 @@ extension ARViewController: ARSCNViewDelegate {
             // Reset status message
             updateStatus("Scanning for artwork...")
         } else {
-            // Update count if multiple still active
-            updateStatus("Viewing \(activeArtworkCount) artwork\(activeArtworkCount > 1 ? "s" : "")")
+            // Show collection name if multiple still active
+            updateStatus("Artificial Flowers")
         }
     }
 }
