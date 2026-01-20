@@ -27,6 +27,7 @@ class ARViewController: UIViewController {
     private var planeNodes: [String: SCNNode] = [:] // Track plane nodes for cleanup
     private var tokenLookup: [String: NFTToken] = [:] // Map trigger name -> token
     private var isMuted: Bool = false
+    private var activeArtworkCount: Int = 0 // Track how many artworks are currently active
 
     // MARK: - Lifecycle
 
@@ -208,7 +209,9 @@ class ARViewController: UIViewController {
         // Load reference images
         if let referenceImages = loadReferenceImages() {
             configuration.trackingImages = referenceImages
-            configuration.maximumNumberOfTrackedImages = 10
+            // Allow tracking all 24 artworks simultaneously
+            configuration.maximumNumberOfTrackedImages = 24
+            NSLog("🎯 AR tracking configured for up to 24 simultaneous images")
         } else {
             updateStatus("No trigger images found")
             return
@@ -234,8 +237,9 @@ class ARViewController: UIViewController {
             guard let image = UIImage(contentsOfFile: imagePath),
                   let cgImage = image.cgImage else { continue }
 
-            // Use default physical width of 30cm (A4-ish size)
-            let physicalWidth: CGFloat = 0.3
+            // Use larger physical width for easier detection from distance
+            // 0.4m (40cm) makes tracking more relaxed than default 0.3m
+            let physicalWidth: CGFloat = 0.4
 
             // Create reference image
             let referenceImage = ARReferenceImage(cgImage, orientation: .up, physicalWidth: physicalWidth)
@@ -533,16 +537,27 @@ extension ARViewController: ARSCNViewDelegate {
         let artworkName = tokenLookup[imageName]?.name ?? imageName
 
         NSLog("🎯 Detected image: \(imageName)")
-        updateStatus("\(artworkName)")
 
-        // Hide buttons for clean viewing experience
-        NSLog("🙈 Hiding buttons")
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            UIView.animate(withDuration: 0.3) {
-                self.soundButton.alpha = 0
-                self.updatesButton.alpha = 0
-                self.emailButton.alpha = 0
+        // Increment active artwork count
+        activeArtworkCount += 1
+
+        // Update status to show multiple artworks if more than one
+        if activeArtworkCount > 1 {
+            updateStatus("Viewing \(activeArtworkCount) artworks")
+        } else {
+            updateStatus("\(artworkName)")
+        }
+
+        // Hide buttons only on first artwork detection
+        if activeArtworkCount == 1 {
+            NSLog("🙈 Hiding buttons")
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                UIView.animate(withDuration: 0.3) {
+                    self.soundButton.alpha = 0
+                    self.updatesButton.alpha = 0
+                    self.emailButton.alpha = 0
+                }
             }
         }
 
@@ -584,37 +599,56 @@ extension ARViewController: ARSCNViewDelegate {
                 NSLog("🗑️ Removed plane node for: \(imageName)")
             }
 
-            // Show buttons again
-            NSLog("👀 Showing buttons")
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                UIView.animate(withDuration: 0.3) {
-                    self.soundButton.alpha = 1
-                    self.updatesButton.alpha = 1
-                    self.emailButton.alpha = 1
-                }
-            }
+            // Decrement active artwork count
+            activeArtworkCount = max(0, activeArtworkCount - 1)
 
-            // Reset status message
-            updateStatus("Scanning for artwork...")
+            // Only show buttons when ALL artworks are gone
+            if activeArtworkCount == 0 {
+                NSLog("👀 Showing buttons (all artworks lost)")
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
+                    UIView.animate(withDuration: 0.3) {
+                        self.soundButton.alpha = 1
+                        self.updatesButton.alpha = 1
+                        self.emailButton.alpha = 1
+                    }
+                }
+
+                // Reset status message
+                updateStatus("Scanning for artwork...")
+            } else {
+                // Update count if multiple still active
+                updateStatus("Viewing \(activeArtworkCount) artwork\(activeArtworkCount > 1 ? "s" : "")")
+            }
         } else if imageAnchor.isTracked && !hasPlayer {
             // Tracking regained - restart video
             NSLog("🔄 Tracking regained for: \(imageName)")
 
             let imageSize = imageAnchor.referenceImage.physicalSize
 
+            // Increment active artwork count
+            activeArtworkCount += 1
+
             // Get artwork name if available
             let artworkName = tokenLookup[imageName]?.name ?? imageName
-            updateStatus("\(artworkName)")
 
-            // Hide buttons again
-            NSLog("🙈 Hiding buttons (regained)")
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                UIView.animate(withDuration: 0.3) {
-                    self.soundButton.alpha = 0
-                    self.updatesButton.alpha = 0
-                    self.emailButton.alpha = 0
+            // Update status to show multiple artworks if more than one
+            if activeArtworkCount > 1 {
+                updateStatus("Viewing \(activeArtworkCount) artworks")
+            } else {
+                updateStatus("\(artworkName)")
+            }
+
+            // Hide buttons only on first artwork
+            if activeArtworkCount == 1 {
+                NSLog("🙈 Hiding buttons (regained)")
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
+                    UIView.animate(withDuration: 0.3) {
+                        self.soundButton.alpha = 0
+                        self.updatesButton.alpha = 0
+                        self.emailButton.alpha = 0
+                    }
                 }
             }
 
@@ -647,17 +681,25 @@ extension ARViewController: ARSCNViewDelegate {
             NSLog("🗑️ Removed plane node for: \(imageName)")
         }
 
-        // Show buttons again
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            UIView.animate(withDuration: 0.3) {
-                self.soundButton.alpha = 1
-                self.updatesButton.alpha = 1
-                self.emailButton.alpha = 1
-            }
-        }
+        // Decrement active artwork count
+        activeArtworkCount = max(0, activeArtworkCount - 1)
 
-        // Reset status message
-        updateStatus("Scanning for artwork...")
+        // Only show buttons when ALL artworks are gone
+        if activeArtworkCount == 0 {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                UIView.animate(withDuration: 0.3) {
+                    self.soundButton.alpha = 1
+                    self.updatesButton.alpha = 1
+                    self.emailButton.alpha = 1
+                }
+            }
+
+            // Reset status message
+            updateStatus("Scanning for artwork...")
+        } else {
+            // Update count if multiple still active
+            updateStatus("Viewing \(activeArtworkCount) artwork\(activeArtworkCount > 1 ? "s" : "")")
+        }
     }
 }
