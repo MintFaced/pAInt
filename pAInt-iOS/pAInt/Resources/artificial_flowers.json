@@ -4,9 +4,9 @@
     "artist": "Ryan Anderson",
     "description": "A generative art collection exploring the intersection of nature and technology",
     "website": "https://opensea.io/collection/artificialflowers",
-    "total_artworks": 24,
+    "total_artworks": 25,
     "version": 1,
-    "last_updated": "2026-01-12"
+    "last_updated": "2026-01-20"
   },
   "artworks": [
     {
@@ -176,6 +176,13 @@
       "image": "af_024.jpg",
       "video": "af_024.mp4",
       "description": "Twenty-fourth piece in the Artificial Flowers collection"
+    },
+    {
+      "id": "25",
+      "name": "The Bright Side",
+      "image": "af_025.jpg",
+      "video": "af_025.mp4",
+      "description": "Twenty-fifth piece in the Artificial Flowers collection"
     }
   ]
 }

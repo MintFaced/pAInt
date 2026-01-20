@@ -64,11 +64,13 @@ class BundleLoader {
         }
 
         NSLog("✅ Loaded manifest: \(manifest.collection.name) v\(manifest.collection.version)")
-        NSLog("   Artworks: \(manifest.artworks.count)")
+        NSLog("   Artworks in manifest: \(manifest.artworks.count)")
 
         // Convert to NFTTokens
         var tokens: [NFTToken] = []
+        var loadedIDs = Set<String>()
 
+        // First, load artworks from manifest (these have proper names)
         for artwork in manifest.artworks {
             // Get paths to bundled files - extract filename and extension
             let imageFileName = (artwork.image as NSString).deletingPathExtension
@@ -98,7 +100,61 @@ class BundleLoader {
             )
 
             tokens.append(token)
+            loadedIDs.insert(artwork.id)
             NSLog("   ✅ Loaded: \(artwork.name)")
+        }
+
+        // Now scan bundle for additional artworks (af_001 to af_050) not in manifest
+        NSLog("🔍 Scanning bundle for additional artworks (af_001 to af_050)...")
+        for i in 1...50 {
+            let tokenId = String(format: "%03d", i) // Formats as "001", "002", etc.
+
+            // Skip if already loaded from manifest
+            if loadedIDs.contains(tokenId) {
+                continue
+            }
+
+            // Try to find image file (jpg or png)
+            let imageFileName = "af_\(tokenId)"
+            var imagePath: String?
+            var imageExtension: String?
+
+            if let path = Bundle.main.path(forResource: imageFileName, ofType: "jpg") {
+                imagePath = path
+                imageExtension = "jpg"
+            } else if let path = Bundle.main.path(forResource: imageFileName, ofType: "png") {
+                imagePath = path
+                imageExtension = "png"
+            }
+
+            // Try to find video file
+            let videoFileName = "af_\(tokenId)"
+            guard let foundImagePath = imagePath,
+                  let videoPath = Bundle.main.path(forResource: videoFileName, ofType: "mp4") else {
+                continue // Skip if image or video not found
+            }
+
+            // Found artwork not in manifest - use fallback name
+            let fallbackName = "Artificial Flower #\(i)"
+
+            let token = NFTToken(
+                tokenId: tokenId,
+                name: fallbackName,
+                imageURL: "",
+                animationURL: nil,
+                imageDetails: nil,
+                animationDetails: nil,
+                attributes: nil,
+                localImagePath: foundImagePath,
+                localVideoPath: videoPath,
+                localCustomImagePath: nil,
+                imageSize: nil,
+                videoSize: nil
+            )
+
+            tokens.append(token)
+            loadedIDs.insert(tokenId)
+            NSLog("   ✅ Auto-detected: af_\(tokenId).\(imageExtension!) (using fallback name: \(fallbackName))")
         }
 
         guard !tokens.isEmpty else {

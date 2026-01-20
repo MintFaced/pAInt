@@ -209,9 +209,9 @@ class ARViewController: UIViewController {
         // Load reference images
         if let referenceImages = loadReferenceImages() {
             configuration.trackingImages = referenceImages
-            // Allow tracking all 24 artworks simultaneously
-            configuration.maximumNumberOfTrackedImages = 24
-            NSLog("🎯 AR tracking configured for up to 24 simultaneous images")
+            // Allow tracking up to 50 artworks simultaneously (future-proof for collection growth)
+            configuration.maximumNumberOfTrackedImages = 50
+            NSLog("🎯 AR tracking configured for up to 50 simultaneous images")
         } else {
             updateStatus("No trigger images found")
             return
