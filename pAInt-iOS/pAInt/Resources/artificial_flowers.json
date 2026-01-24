@@ -4,9 +4,9 @@
     "artist": "Ryan Anderson",
     "description": "A generative art collection exploring the intersection of nature and technology",
     "website": "https://opensea.io/collection/artificialflowers",
-    "total_artworks": 25,
+    "total_artworks": 27,
     "version": 1,
-    "last_updated": "2026-01-20"
+    "last_updated": "2026-01-24"
   },
   "artworks": [
     {
@@ -183,6 +183,20 @@
       "image": "af_025.jpg",
       "video": "af_025.mp4",
       "description": "Twenty-fifth piece in the Artificial Flowers collection"
+    },
+    {
+      "id": "26",
+      "name": "Plant Bae",
+      "image": "af_026.jpg",
+      "video": "af_026.mp4",
+      "description": "Twenty-sixth piece in the Artificial Flowers collection"
+    },
+    {
+      "id": "27",
+      "name": "The Watched",
+      "image": "af_027.jpg",
+      "video": "af_027.mp4",
+      "description": "Twenty-seventh piece in the Artificial Flowers collection"
     }
   ]
 }
