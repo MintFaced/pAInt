@@ -4,7 +4,7 @@
     "artist": "Ryan Anderson",
     "description": "A generative art collection exploring the intersection of nature and technology",
     "website": "https://opensea.io/collection/artificialflowers",
-    "total_artworks": 30,
+    "total_artworks": 31,
     "version": 1,
     "last_updated": "2026-02-06"
   },
@@ -197,6 +197,13 @@
       "image": "af_027.jpg",
       "video": "af_027.mp4",
       "description": "Twenty-seventh piece in the Artificial Flowers collection"
+    },
+    {
+      "id": "28",
+      "name": "Exotic Adventure",
+      "image": "af_028.jpg",
+      "video": "af_028.mp4",
+      "description": "Twenty-eighth piece in the Artificial Flowers collection"
     },
     {
       "id": "29",
