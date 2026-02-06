@@ -84,8 +84,11 @@ class BundleLoader {
                 continue
             }
 
+            // Normalize ID to 3-digit format (e.g., "29" -> "029")
+            let normalizedId = String(format: "%03d", Int(artwork.id) ?? 0)
+
             let token = NFTToken(
-                tokenId: artwork.id,
+                tokenId: normalizedId,
                 name: artwork.name,
                 imageURL: "", // Not needed - using local files
                 animationURL: nil,
@@ -100,7 +103,7 @@ class BundleLoader {
             )
 
             tokens.append(token)
-            loadedIDs.insert(artwork.id)
+            loadedIDs.insert(normalizedId)
             NSLog("   ✅ Loaded: \(artwork.name)")
         }
 
