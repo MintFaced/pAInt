@@ -49,6 +49,12 @@ class ARViewController: UIViewController {
 
         setupUI()
         setupAR()
+        setupLifecycleObservers()
+    }
+
+    deinit {
+        // Remove lifecycle observers
+        NotificationCenter.default.removeObserver(self)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -196,6 +202,49 @@ class ARViewController: UIViewController {
 
     private func setupAR() {
         arView.scene = SCNScene()
+    }
+
+    private func setupLifecycleObservers() {
+        // Pause AR and videos when app goes to background
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAppWillResignActive),
+            name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+
+        // Resume AR when app comes back to foreground
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAppDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+
+        NSLog("✅ App lifecycle observers configured")
+    }
+
+    @objc private func handleAppWillResignActive() {
+        NSLog("⏸️ App going to background - pausing AR and videos")
+
+        // Pause AR session to prevent GPU rendering in background
+        arView.session.pause()
+
+        // Pause all video players
+        for (name, player) in videoPlayers {
+            player.pause()
+            NSLog("⏸️ Paused video: \(name)")
+        }
+    }
+
+    @objc private func handleAppDidBecomeActive() {
+        NSLog("▶️ App returning to foreground - resuming AR")
+
+        // Resume AR session
+        startARSession()
+
+        // Videos will automatically resume when tracking is detected again
+        // This is better than force-resuming all videos, as some may no longer be tracked
     }
 
     private func startARSession() {
