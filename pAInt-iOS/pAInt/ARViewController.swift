@@ -300,7 +300,7 @@ class ARViewController: UIViewController {
             // Store token for lookup
             tokenLookup[triggerName] = token
 
-            NSLog("✅ Loaded trigger: \(token.name)")
+            NSLog("✅ Loaded trigger: \(triggerName) -> \(token.name) (tokenId: \(token.tokenId))")
         }
 
         // Fallback: Load test image from bundle if no collections
@@ -590,6 +590,10 @@ extension ARViewController: ARSCNViewDelegate {
         let artworkName = tokenLookup[imageName]?.name ?? imageName
 
         NSLog("🎯 Detected image: \(imageName)")
+        NSLog("   Lookup result: \(artworkName)")
+        if tokenLookup[imageName] == nil {
+            NSLog("   ⚠️ No token found in lookup for: \(imageName)")
+        }
 
         // Increment active artwork count
         activeArtworkCount += 1

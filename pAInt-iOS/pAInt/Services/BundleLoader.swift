@@ -104,7 +104,7 @@ class BundleLoader {
 
             tokens.append(token)
             loadedIDs.insert(normalizedId)
-            NSLog("   ✅ Loaded: \(artwork.name)")
+            NSLog("   ✅ Loaded: \(artwork.name) (ID: \(artwork.id) -> \(normalizedId))")
         }
 
         // Now scan bundle for additional artworks (af_001 to af_050) not in manifest
