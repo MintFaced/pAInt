@@ -4,9 +4,9 @@
     "artist": "Ryan Anderson",
     "description": "A generative art collection exploring the intersection of nature and technology",
     "website": "https://opensea.io/collection/artificialflowers",
-    "total_artworks": 27,
+    "total_artworks": 30,
     "version": 1,
-    "last_updated": "2026-01-24"
+    "last_updated": "2026-02-06"
   },
   "artworks": [
     {
@@ -197,6 +197,27 @@
       "image": "af_027.jpg",
       "video": "af_027.mp4",
       "description": "Twenty-seventh piece in the Artificial Flowers collection"
+    },
+    {
+      "id": "29",
+      "name": "Attempting to Reconnect",
+      "image": "af_029.jpg",
+      "video": "af_029.mp4",
+      "description": "Twenty-ninth piece in the Artificial Flowers collection"
+    },
+    {
+      "id": "30",
+      "name": "Sutures in Spring",
+      "image": "af_030.jpg",
+      "video": "af_030.mp4",
+      "description": "Thirtieth piece in the Artificial Flowers collection"
+    },
+    {
+      "id": "31",
+      "name": "Eyes in Exile",
+      "image": "af_031.jpg",
+      "video": "af_031.mp4",
+      "description": "Thirty-first piece in the Artificial Flowers collection"
     }
   ]
 }
