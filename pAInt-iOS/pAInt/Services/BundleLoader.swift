@@ -80,7 +80,9 @@ class BundleLoader {
 
             guard let imagePath = Bundle.main.path(forResource: imageFileName, ofType: imageExtension),
                   let videoPath = Bundle.main.path(forResource: videoFileName, ofType: videoExtension) else {
-                NSLog("⚠️ Missing files for artwork #\(artwork.id) (\(artwork.image)) - skipping")
+                NSLog("⚠️ Missing files for artwork #\(artwork.id) '\(artwork.name)'")
+                NSLog("   Looking for: \(imageFileName).\(imageExtension) and \(videoFileName).\(videoExtension)")
+                NSLog("   → This artwork will use fallback name if files exist in bundle")
                 continue
             }
 
